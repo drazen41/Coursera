@@ -28,21 +28,52 @@ public class TxHandler {
      */
     public boolean isValidTx(Transaction tx) {
         // IMPLEMENT THIS
-    	boolean ok = true;
+    	boolean ok = true;   	   	
     	ArrayList<Transaction.Input> inputs = tx.getInputs();
     	ArrayList<Transaction.Output > outputs = tx.getOutputs();
+    	
     	double inputSum = 0;
     	double outputSum = 0;
-		for (Transaction.Input input  :  inputs) {
-			UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-			Transaction.Output output = this.utxoPool.getTxOutput(utxo);
-			inputSum += output.value ;
-		}
-		for (Transaction.Output output : outputs) {
-			outputSum += output.value ;
+    	int i = 0;
+    	if (inputs != null) {
+    		for (Transaction.Input input  :  inputs) {
+    			try {
+    				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+        			Transaction.Output output = this.utxoPool.getTxOutput(utxo);
+        			inputSum += output.value ;
+        			PublicKey publicKey = output.address;
+        			byte[] message = tx.getRawDataToSign(i);
+        			byte[] signature = tx.getRawTx();
+        			if (Crypto.verifySignature(publicKey, message, signature)) {
+        				return false;
+        			}
+
+				} catch (Exception e) {
+					// TODO: handle exception
+					System.out.println(input.prevTxHash.toString());
+					return false;
+				}
+    			i++;
+    		}
+    	}
+		if (outputs != null) {
 			
-			
+//			for (int i = 0; i < outputs.size(); i++) {
+//				UTXO utxo = new UTXO(tx.getHash(), i);
+//				if (!this.utxoPool.contains(utxo)) {
+//					return false;
+//				}
+//				Transaction.Output output = tx.getOutput(i);
+//				if (output.value < 0) return false;
+//				outputSum += output.value ;
+//			}
+			for (Transaction.Output  output : outputs) {
+				if (output.value < 0) return false;
+				outputSum += output.value ;
+
+			}
 		}
+//		
     	if (inputSum < outputSum) return false;
     	
     	return ok;
