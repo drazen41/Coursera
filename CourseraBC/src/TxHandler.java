@@ -53,16 +53,17 @@ public class TxHandler {
         			Transaction.Output output2 = tx.getOutput(input.outputIndex );
         			
         			
-//        			PublicKey publicKey = output2.address;
-//        			byte[] message = tx.getRawDataToSign(i);
-//        			byte[] signature = input.signature;
-//        			try {
-//						boolean verify = Crypto.verifySignature(publicKey, message, signature);
+        			PublicKey publicKey = output.address;
+        			byte[] message = tx.getRawDataToSign(i);
+        			byte[] signature = input.signature;
+        			try {
+						boolean verify = Crypto.verifySignature(publicKey, message, signature);
+						if (!verify) return false;
 //						System.out.println(input.signature.toString() + "-> sig, " + i + "->brojac");
-//					} catch (Exception e) {
-//						// TODO: handle exception
-//						System.out.println(e.getMessage());
-//					}
+					} catch (Exception e) {
+						// TODO: handle exception
+						System.out.println(e.getMessage());
+					}
         			
         				//return false;
         				
@@ -114,18 +115,36 @@ public class TxHandler {
     	UTXOPool utxoPool = new UTXOPool();
     	ArrayList<UTXO> utxos = this.utxoPool.getAllUTXO();
     	for (Transaction transaction : possibleTxs) {
-			if(!isValidTx(transaction )) {
-				ArrayList<Transaction.Output> outputs = transaction.getOutputs();
+    		ArrayList<Transaction.Output> outputs = transaction.getOutputs();
+    		if(!isValidTx(transaction )) {
+				
 				for (int j = 0; j < outputs.size(); j++) {
 					UTXO utxo = new UTXO(transaction.getHash(), j);
+					
 					if (this.utxoPool.contains(utxo)) {
 						this.utxoPool.removeUTXO(utxo);
 					}
 				}
 			}
 			else {
-				transactions[i] = transaction;
-				i++;
+				boolean ok = true;
+				for (int j = 0; j < outputs.size(); j++) {
+					UTXO utxo = new UTXO(transaction.getHash(), j);
+					if (!utxos.contains(utxo)) {					
+						utxos.add(utxo);
+					}
+					else {
+						ok = false;
+					}
+					
+				}
+				if (ok) {
+					transactions[i] = transaction;
+					i++;
+				}
+				
+				
+				
 			}
 		}
     	
