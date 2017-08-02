@@ -1,3 +1,4 @@
+import java.awt.List;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,22 +36,40 @@ public class TxHandler {
     	double inputSum = 0;
     	double outputSum = 0;
     	int i = 0;
+    	ArrayList<Transaction.Output> usedOutputs = new ArrayList<Transaction.Output>();
     	if (inputs != null) {
     		for (Transaction.Input input  :  inputs) {
     			try {
     				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
         			Transaction.Output output = this.utxoPool.getTxOutput(utxo);
-        			inputSum += output.value ;
-        			PublicKey publicKey = output.address;
-        			byte[] message = tx.getRawDataToSign(i);
-        			byte[] signature = tx.getRawTx();
-        			if (Crypto.verifySignature(publicKey, message, signature)) {
+        			if (usedOutputs.contains(output )) {
         				return false;
         			}
-
+        			else {
+        				usedOutputs.add(output);
+        			}
+        			inputSum += output.value ;
+        			
+        			Transaction.Output output2 = tx.getOutput(input.outputIndex );
+        			
+        			
+//        			PublicKey publicKey = output2.address;
+//        			byte[] message = tx.getRawDataToSign(i);
+//        			byte[] signature = input.signature;
+//        			try {
+//						boolean verify = Crypto.verifySignature(publicKey, message, signature);
+//						System.out.println(input.signature.toString() + "-> sig, " + i + "->brojac");
+//					} catch (Exception e) {
+//						// TODO: handle exception
+//						System.out.println(e.getMessage());
+//					}
+        			
+        				//return false;
+        				
+        			
 				} catch (Exception e) {
 					// TODO: handle exception
-					System.out.println(input.prevTxHash.toString());
+//					System.out.println(input.prevTxHash.toString());
 					return false;
 				}
     			i++;
@@ -58,19 +77,23 @@ public class TxHandler {
     	}
 		if (outputs != null) {
 			
-//			for (int i = 0; i < outputs.size(); i++) {
-//				UTXO utxo = new UTXO(tx.getHash(), i);
+//			for (int j = 0; j < outputs.size(); j++) {
+//				UTXO utxo = new UTXO(tx.getHash(), j);
 //				if (!this.utxoPool.contains(utxo)) {
 //					return false;
 //				}
-//				Transaction.Output output = tx.getOutput(i);
-//				if (output.value < 0) return false;
-//				outputSum += output.value ;
+////				Transaction.Output output = tx.getOutput(i);
+////				if (output.value < 0) return false;
+////				outputSum += output.value ;
 //			}
 			for (Transaction.Output  output : outputs) {
+//				if (output.value < 0) {
+//					System.out.println(output.value );
+//				}
 				if (output.value < 0) return false;
 				outputSum += output.value ;
-
+				
+				
 			}
 		}
 //		
@@ -91,7 +114,19 @@ public class TxHandler {
     	UTXOPool utxoPool = new UTXOPool();
     	ArrayList<UTXO> utxos = this.utxoPool.getAllUTXO();
     	for (Transaction transaction : possibleTxs) {
-			
+			if(!isValidTx(transaction )) {
+				ArrayList<Transaction.Output> outputs = transaction.getOutputs();
+				for (int j = 0; j < outputs.size(); j++) {
+					UTXO utxo = new UTXO(transaction.getHash(), j);
+					if (this.utxoPool.contains(utxo)) {
+						this.utxoPool.removeUTXO(utxo);
+					}
+				}
+			}
+			else {
+				transactions[i] = transaction;
+				i++;
+			}
 		}
     	
     	return transactions ;
