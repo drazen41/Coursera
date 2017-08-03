@@ -115,6 +115,7 @@ public class TxHandler {
     	UTXOPool utxoPool = new UTXOPool();
     	ArrayList<UTXO> utxos = this.utxoPool.getAllUTXO();
     	for (Transaction transaction : possibleTxs) {
+    		if (transaction == null) continue;
     		ArrayList<Transaction.Output> outputs = transaction.getOutputs();
     		if(!isValidTx(transaction )) {
 				
@@ -127,11 +128,23 @@ public class TxHandler {
 				}
 			}
 			else {
-				
-				
-				
-				
 				boolean ok = true;
+				ArrayList<Transaction.Input> inputs = transaction.getInputs();
+				for (Transaction.Input input : inputs) {
+					UTXO utxo = new UTXO(input.prevTxHash,input.outputIndex );
+					Transaction.Output output = utxoPool.getTxOutput(utxo);
+					if (!utxoPool.contains(utxo)) {
+						utxoPool.addUTXO(utxo, output );
+					}
+					else {
+						ok = false;
+					}
+					
+				}
+				
+				
+				
+				
 				
 //				for (int j = 0; j < outputs.size(); j++) {
 //					UTXO utxo = new UTXO(transaction.getHash(), j);
@@ -140,30 +153,29 @@ public class TxHandler {
 //					}					
 //					
 //				}
-				ArrayList<Transaction.Input> inputs = transaction.getInputs();
+				
 ////				int in = 0;
 //				
-				boolean firstUtxo = false;
-				for (Transaction.Input input : inputs) {
-					UTXO utxo = new UTXO(input.prevTxHash,input.outputIndex );
-//					byte[] prevTxHash = input.prevTxHash;
-					if(!utxos.contains(utxo )) {
-						utxos.add(utxo);
-						firstUtxo = true;
-					}
-					else {
-						if (!firstUtxo) {
-							// check double spend
-							if (utxos.contains(utxo)) {
-//								ok = false;
-							}
-							
-							
-						}
-						
-					}
-					if (!ok) continue;
-				}
+//				boolean firstUtxo = false;
+//				for (Transaction.Input input : inputs) {
+//					UTXO utxo = new UTXO(input.prevTxHash,input.outputIndex );
+//					if(!utxos.contains(utxo )) {
+//						utxos.add(utxo);
+//						firstUtxo = true;
+//					}
+//					else {
+//						if (!firstUtxo) {
+//							// check double spend
+//							if (utxos.contains(utxo)) {
+////								ok = false;
+//							}
+//							
+//							
+//						}
+//						
+//					}
+//					if (!ok) continue;
+//				}
 				if (ok) {
 					transactions[i] = transaction;
 					i++;

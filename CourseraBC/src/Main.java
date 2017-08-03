@@ -21,7 +21,7 @@ public class Main {
          */
         KeyPair pk_scrooge = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         KeyPair pk_alice   = KeyPairGenerator.getInstance("RSA").generateKeyPair();
-
+        KeyPair pk_bob = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         /*
          * Set up the root transaction:
          *
@@ -54,12 +54,14 @@ public class Main {
 
         // the Transaction.Output of tx at position 0 has a value of 10
         tx2.addInput(tx.getHash(), 0);
-
+        
         // I split the coin of value 10 into 3 coins and send all of them for simplicity to
         // the same address (Alice)
         tx2.addOutput(5, pk_alice.getPublic());
         tx2.addOutput(3, pk_alice.getPublic());
         tx2.addOutput(2, pk_alice.getPublic());
+       
+        
         // Note that in the real world fixed-point types would be used for the values, not doubles.
         // Doubles exhibit floating-point rounding errors. This type should be for example BigInteger
         // and denote the smallest coin fractions (Satoshi in Bitcoin).
@@ -67,7 +69,13 @@ public class Main {
         // There is only one (at position 0) Transaction.Input in tx2
         // and it contains the coin from Scrooge, therefore I have to sign with the private key from Scrooge
         tx2.signTx(pk_scrooge.getPrivate(), 0);
-        
+        UTXOPool utxoPool2 = new UTXOPool();
+        UTXO utxo2 = new UTXO(tx2.getHash(), 0);
+        utxoPool2.addUTXO(utxo2, tx2.getOutput(0));
+        UTXO utxo3 = new UTXO(tx2.getHash(), 1);
+        utxoPool2.addUTXO(utxo3, tx2.getOutput(1));
+        UTXO utxo4 = new UTXO(tx2.getHash(), 2);
+        utxoPool2.addUTXO(utxo4, tx2.getOutput(2));
         /*
          * Start the test
          */
@@ -78,6 +86,27 @@ public class Main {
         System.out.println("txHandler.isValidTx(tx2) returns: " + txHandler.isValidTx(tx2));
         System.out.println("txHandler.handleTxs(new Transaction[]{tx2}) returns: " +
             txHandler.handleTxs(new Transaction[]{tx2}).length + " transaction(s)");
+       
+        TxHandler txHandler2 = new TxHandler(utxoPool2);
+        Transaction[] transactions = new Transaction[5];
+        transactions[0] = tx;
+        transactions[1] = tx2;
+        Transaction[] handled = txHandler2.handleTxs(transactions );
+        
+        // double spend
+        Transaction[] transactions2 = new Transaction[5];
+        Transaction tx3 = new Transaction();
+        tx3.addInput(tx2.getHash(), 0);
+        
+        tx3.addOutput(3, pk_bob.getPublic());
+        tx3.addOutput(2, pk_scrooge.getPublic());
+        UTXOPool utxoPool3 = new UTXOPool();
+        UTXO utxo5 = new UTXO(tx3.getHash(), 0);
+        utxoPool3.addUTXO(utxo2 , tx3.getOutput(0));
+        transactions[0] = tx2;
+        transactions[1] = tx3;
+        TxHandler txHandler3 = new TxHandler(utxoPool);
+        Transaction[] handled2 = txHandler3.handleTxs(transactions2 );
     }
 
 
