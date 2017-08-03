@@ -127,16 +127,42 @@ public class TxHandler {
 				}
 			}
 			else {
+				
+				
+				
+				
 				boolean ok = true;
-				for (int j = 0; j < outputs.size(); j++) {
-					UTXO utxo = new UTXO(transaction.getHash(), j);
-					if (!utxos.contains(utxo)) {					
+				
+//				for (int j = 0; j < outputs.size(); j++) {
+//					UTXO utxo = new UTXO(transaction.getHash(), j);
+//					if (!utxos.contains(utxo)) {					
+//						utxos.add(utxo);
+//					}					
+//					
+//				}
+				ArrayList<Transaction.Input> inputs = transaction.getInputs();
+////				int in = 0;
+//				
+				boolean firstUtxo = false;
+				for (Transaction.Input input : inputs) {
+					UTXO utxo = new UTXO(input.prevTxHash,input.outputIndex );
+//					byte[] prevTxHash = input.prevTxHash;
+					if(!utxos.contains(utxo )) {
 						utxos.add(utxo);
+						firstUtxo = true;
 					}
 					else {
-						ok = false;
+						if (!firstUtxo) {
+							// check double spend
+							if (utxos.contains(utxo)) {
+//								ok = false;
+							}
+							
+							
+						}
+						
 					}
-					
+					if (!ok) continue;
 				}
 				if (ok) {
 					transactions[i] = transaction;

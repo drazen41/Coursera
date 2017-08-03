@@ -1,0 +1,19 @@
+Test 11: test handleTransactions() with simple and valid transactions with some double spends 
+Total Transactions = 2 Number of transactions returned valid by student = 2 All transactions returned are not satisfied/valid 
+Total Transactions = 50 Number of transactions returned valid by student = 50 All transactions returned are not satisfied/valid 
+Total Transactions = 100 Number of transactions returned valid by student = 100 All transactions returned are not satisfied/valid ==> FAILED
+
+Test 12: test handleTransactions() with valid but some transactions are simple, some depend on other transactions 
+Total Transactions = 2 Number of transactions returned valid by student = 2 Returned set is not a maximal set of transactions 
+Total Transactions = 50 Number of transactions returned valid by student = 50 Returned set is not a maximal set of transactions 
+Total Transactions = 100 Number of transactions returned valid by student = 100 Returned set is not a maximal set of transactions ==> FAILED
+
+Test 14: test handleTransactions() with complex Transactions 
+Total Transactions = 2 Number of transactions returned valid by student = 2 Returned set is not a maximal set of transactions 
+Total Transactions = 50 Number of transactions returned valid by student = 50 All transactions returned are not satisfied/valid 
+Total Transactions = 100 Number of transactions returned valid by student = 100 All transactions returned are not satisfied/valid ==> FAILED
+
+Test 15: test handleTransactions() with simple, valid transactions being called again to check for changes made in the pool 
+Total Transactions = 2 Number of transactions returned valid by student = 2 
+Total Transactions = 50 Number of transactions returned valid by student = 50 All transactions returned are not satisfied/valid 
+Total Transactions = 100 Number of transactions returned valid by student = 100 All transactions returned are not satisfied/valid ==> FAILED 
