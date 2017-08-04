@@ -139,7 +139,13 @@ public class TxHandler {
 						utxoPool.addUTXO(utxo, output );
 					}
 					else {
+//						for (Transaction.Output  output2  : outputs ) {
+//							if (output2.equals(output )) {
+//								
+//							}
+//						}
 						ok = false;
+						
 					}
 					
 				}
@@ -150,10 +156,13 @@ public class TxHandler {
 				
 //				for (int j = 0; j < outputs.size(); j++) {
 //					UTXO utxo = new UTXO(transaction.getHash(), j);
-//					if (!utxos.contains(utxo)) {					
-//						utxos.add(utxo);
+//					Transaction.Output output = utxoPool.getTxOutput(utxo);
+//					if (!utxoPool.contains(utxo)) {					
+//						utxoPool.addUTXO(utxo, output);
 //					}					
-//					
+//					else {
+//						ok = false;
+//					}
 //				}
 				
 ////				int in = 0;
