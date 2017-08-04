@@ -92,21 +92,44 @@ public class Main {
         transactions[0] = tx;
         transactions[1] = tx2;
         Transaction[] handled = txHandler2.handleTxs(transactions );
+        System.out.println(handled.length);
         
         // double spend
         Transaction[] transactions2 = new Transaction[5];
-        Transaction tx3 = new Transaction();
+        Tx tx3 = new Tx();
         tx3.addInput(tx2.getHash(), 0);
         
         tx3.addOutput(3, pk_bob.getPublic());
         tx3.addOutput(2, pk_scrooge.getPublic());
+        tx3.signTx(pk_alice.getPrivate(), 0);
         UTXOPool utxoPool3 = new UTXOPool();
         UTXO utxo5 = new UTXO(tx3.getHash(), 0);
-        utxoPool3.addUTXO(utxo2 , tx3.getOutput(0));
-        transactions[0] = tx2;
-        transactions[1] = tx3;
-        TxHandler txHandler3 = new TxHandler(utxoPool);
+        utxoPool3.addUTXO(utxo5 , tx3.getOutput(0));
+        UTXO utxo6 = new UTXO(tx3.getHash(), 1);
+        utxoPool3.addUTXO(utxo6 , tx3.getOutput(1));
+        // double spend transactions
+        Tx tx4 = new Tx();
+        tx4.addInput(tx2.getHash(), 0);
+        tx4.addOutput(2, pk_bob.getPublic());
+        tx4.signTx(pk_alice.getPrivate(), 0);
+        UTXO utxo7 = new UTXO(tx4.getHash(), 0);
+        utxoPool3.addUTXO(utxo7, tx4.getOutput(0));
+        
+        Tx tx5 = new Tx();
+        tx5.addInput(tx2.getHash(), 1);
+        tx5.addOutput(2, pk_alice.getPublic());
+        tx5.signTx(pk_alice.getPrivate(), 0);
+        UTXO utxo8 = new UTXO(tx4.getHash(), 0);
+        utxoPool3.addUTXO(utxo8, tx5.getOutput(0));
+        
+       
+        
+        transactions2[0] = tx3;
+        transactions2[1] = tx4;
+        transactions2[2] = tx5;
+        TxHandler txHandler3 = new TxHandler(utxoPool3);
         Transaction[] handled2 = txHandler3.handleTxs(transactions2 );
+        System.out.println(handled2.length);
     }
 
 

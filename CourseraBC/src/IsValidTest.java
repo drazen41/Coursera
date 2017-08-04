@@ -36,6 +36,21 @@ public class IsValidTest {
 			assertEquals(txHandler.isValidTx(tx), trxsValidation.isValid(tx) );
 		}
 	}
+	private static void assertTestSetIsValidForHandler(final UtxoTestSet utxoTestSet ) {
+		final ValidationLists<Transaction> trxsValidation = utxoTestSet.getValidationLists();
+		
+		// Instantiate student solution
+		final TxHandler txHandler = new TxHandler(utxoTestSet.getUtxoPool());
+		Transaction[] transactions = new Transaction[trxsValidation.allElements().size()];
+		
+		int i = 0;
+		for (Transaction tx: trxsValidation.allElements()) {
+			transactions[i] = tx;
+			i++;
+		}
+//		txHandler.handleTxs(transactions );
+		assertEquals(8,txHandler.handleTxs(transactions).length );
+	}
 
 	// Test 1: test isValidTx() with valid transactions
 	@Test
@@ -182,7 +197,25 @@ public class IsValidTest {
 		assertTestSetIsValid(utxoTestSet);
 		
 	}
-	
+	 // Test 8: test isValidTx() with transactions that claim the same UTXO multiple times
+		@Test
+		public void testIsValidHandlesDoubleSpend() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+			// Create a new set of transactions for testing				
+			final UtxoTestSet utxoTestSet = UtxoTestSet.builder()
+					.setPeopleSize(10)
+					.setUtxoTxNumber(10)
+					.setMaxUtxoTxOutput(10)
+					.setMaxValue(200)
+					.setTxPerTest(10)
+					.setMaxInput(10)
+					.setMaxOutput(10)
+					.setClaimingUtxoSeveralTimes(true)  // create transactions claiming the same output several times
+					.setCorruptedPercentage(.20) // probability of 20% of invalid transactions
+					.build();
+
+			assertTestSetIsValidForHandler(utxoTestSet);
+			
+		}
 
 
 

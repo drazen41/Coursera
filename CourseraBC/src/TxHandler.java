@@ -32,10 +32,10 @@ public class TxHandler {
     	boolean ok = true;   	   	
     	ArrayList<Transaction.Input> inputs = tx.getInputs();
     	ArrayList<Transaction.Output > outputs = tx.getOutputs();
-    	
+    	int i = 0;
     	double inputSum = 0;
     	double outputSum = 0;
-    	int i = 0;
+    	
     	ArrayList<Transaction.Output> usedOutputs = new ArrayList<Transaction.Output>();
     	if (inputs != null) {
     		for (Transaction.Input input  :  inputs) {
@@ -110,13 +110,15 @@ public class TxHandler {
      */
     public Transaction[] handleTxs(Transaction[] possibleTxs) {
         // IMPLEMENT THIS
-    	Transaction[] transactions = new Transaction[possibleTxs.length];
-    	int i = 0;
+    	
+    	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
+    	//int i = 0;
     	UTXOPool utxoPool = new UTXOPool();
     	ArrayList<UTXO> utxos = this.utxoPool.getAllUTXO();
     	for (Transaction transaction : possibleTxs) {
     		if (transaction == null) continue;
     		ArrayList<Transaction.Output> outputs = transaction.getOutputs();
+    		
     		if(!isValidTx(transaction )) {
 				
 				for (int j = 0; j < outputs.size(); j++) {
@@ -177,14 +179,21 @@ public class TxHandler {
 //					if (!ok) continue;
 //				}
 				if (ok) {
-					transactions[i] = transaction;
-					i++;
+					goodTransactions.add(transaction);
+					
 				}
 				
 				
 				
 			}
 		}
+    	Transaction[] transactions = new Transaction[goodTransactions.size()];
+    	int i = 0;
+    	for (Transaction transaction2 : goodTransactions) {
+			transactions[i] = transaction2 ;
+    		i++;
+		}
+    	
     	
     	return transactions ;
     }
