@@ -19,12 +19,18 @@ public class Simulation {
       // p_malicious (.15, .30, .45), p_txDistribution (.01, .05, .10), 
       // and numRounds (10, 20). You should try to test your CompliantNode
       // code for all 3x3x3x2 = 54 combinations.
-
+//	  double[] arr_p_graph = new double[] {0.1,0.2,0.4};
+//	  double[] arr_p_ma
+	  String[] argv = new String[4];
+	  argv[0] = "0.1";
+	  argv[1] = "0.15";
+	  argv[2] = "0.01";
+	  argv[3] = "10";
       int numNodes = 100;
-      double p_graph = Double.parseDouble(args[0]); // parameter for random graph: prob. that an edge will exist
-      double p_malicious = Double.parseDouble(args[1]); // prob. that a node will be set to be malicious
-      double p_txDistribution = Double.parseDouble(args[2]); // probability of assigning an initial transaction to each node 
-      int numRounds = Integer.parseInt(args[3]); // number of simulation rounds your nodes will run for
+      double p_graph = Double.parseDouble(argv[0]); // parameter for random graph: prob. that an edge will exist
+      double p_malicious = Double.parseDouble(argv[1]); // prob. that a node will be set to be malicious
+      double p_txDistribution = Double.parseDouble(argv[2]); // probability of assigning an initial transaction to each node 
+      int numRounds = Integer.parseInt(argv[3]); // number of simulation rounds your nodes will run for
 
       // pick which nodes are malicious and which are compliant
       Node[] nodes = new Node[numNodes];

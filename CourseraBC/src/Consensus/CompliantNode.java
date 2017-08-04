@@ -9,7 +9,7 @@ public class CompliantNode implements Node {
     public CompliantNode(double p_graph, double p_malicious, double p_txDistribution, int numRounds) {
         // IMPLEMENT THIS
     }
-
+    // 1. 
     public void setFollowees(boolean[] followees) {
         // IMPLEMENT THIS
     }
