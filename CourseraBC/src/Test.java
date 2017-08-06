@@ -48,6 +48,9 @@ public class Test {
         UTXO utxo4 = new UTXO(tx2.getHash(),3); // 2 coins of Alice
         System.out.println("OK utxo: " + tx2.getHash() + ", " + utxo4.getIndex());
         utxoPool.addUTXO(utxo4, tx2.getOutput(2));
+        UTXO utxo6 = new UTXO(tx2.getHash(),5); 
+        System.out.println("Bad utxo: " + tx2.getHash() + ", " + utxo6.getIndex());
+        utxoPool.addUTXO(utxo6, tx2.getOutput(2)); //utxo6 claims output by utxo4 in same tx
         
         // Double spend transaction - trying to spend coins from tx which tx2 already had spent        
         Main.Tx tx3 = new Main.Tx();
@@ -81,8 +84,8 @@ public class Test {
         System.out.println("txHandler.handleTxs(transactions) returns: " +
                 txHandler.handleTxs(transactions).length +  " transaction(s)");
         System.out.println("TxHandlers UTXOpool contains: " + txHandler.utxoPool.getAllUTXO().size() + " UTXO(s)");
-        System.out.println("Second call of txHandler.handleTxs(transactions) returns: " + txHandler.handleTxs(transactions).length +  " transaction(s)");
-        System.out.println("Second call TxHandlers UTXOpool contains: " + txHandler.utxoPool.getAllUTXO().size() + " UTXO(s)");
+//        System.out.println("Second call of txHandler.handleTxs(transactions) returns: " + txHandler.handleTxs(transactions).length +  " transaction(s)");
+//        System.out.println("Second call TxHandlers UTXOpool contains: " + txHandler.utxoPool.getAllUTXO().size() + " UTXO(s)");
 	}
 	
 }

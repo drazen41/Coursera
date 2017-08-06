@@ -40,14 +40,21 @@ public class TxHandler {
     	if (inputs != null) {
     		for (Transaction.Input input  :  inputs) {
     			try {
-    				if (input.prevTxHash.hashCode() == 0) continue;
     				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
         			Transaction.Output output = this.utxoPool.getTxOutput(utxo);
         			if (usedOutputs.contains(output )) {
         				return false;
         			}
         			else {
-        				if (output == null) return true; //root transaction
+//        				if (input.prevTxHash.length == 0) {
+//							return true;
+//						}
+        				if (output == null) {
+//							System.out.println("Input.prevTxHash.length: " + input.prevTxHash.length + "Input.outputIndex: " + input.outputIndex);
+        					if (input.prevTxHash.length == 1) {
+								return true; // genesis 
+							}
+						}
         				usedOutputs.add(output);
         			}
         			inputSum += output.value ;
@@ -80,15 +87,7 @@ public class TxHandler {
     	}
 		if (outputs != null) {
 			
-//			for (int j = 0; j < outputs.size(); j++) {
-//				UTXO utxo = new UTXO(tx.getHash(), j);
-//				if (!this.utxoPool.contains(utxo)) {
-//					return false;
-//				}
-////				Transaction.Output output = tx.getOutput(i);
-////				if (output.value < 0) return false;
-////				outputSum += output.value ;
-//			}
+
 			for (Transaction.Output  output : outputs) {
 //				if (output.value < 0) {
 //					System.out.println(output.value );
@@ -115,14 +114,19 @@ public class TxHandler {
     	
     	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
     	//int i = 0;
-    	
+    	ArrayList<UTXO> spentUtxos = new ArrayList<UTXO>();
     	ArrayList<UTXO> badUtxos = new ArrayList<UTXO>();
+//    	System.out.println("UTXOpool before:");
+//    	for (UTXO utxo : this.utxoPool.getAllUTXO()) {
+//    		Transaction.Output output = this.utxoPool.getTxOutput(utxo);
+//			System.out.println("------------Address: " + output.address + ", value: " + output.value);
+//		}
     	int utxoPoolIndex = 0;
     	for (Transaction transaction : possibleTxs) {
     		if (transaction == null) continue;
     		
     		ArrayList<Transaction.Output> outputs = transaction.getOutputs();
-    		
+//    		System.out.println("utxoPoolIndex: " + utxoPoolIndex);
     		if(!isValidTx(transaction )) {
 				
 				for (int j = 0; j < outputs.size(); j++) {
@@ -143,27 +147,29 @@ public class TxHandler {
 				//	 System.out.println("OK utxo: " + utxo.getTxHash().toString() + ", " + utxo.getIndex());
 				//	System.out.println("Not removed utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
 //					Transaction.Output output = utxoPool.getTxOutput(utxo);
-					if (utxoPool.contains(utxo)) {
+					if (spentUtxos.contains(utxo)) {
 						ok = false;
 						for (Transaction.Output output : outputs) {
 //							System.out.println("Transaction hash: " + transaction.getHash() + ", at: " + utxoPoolIndex);
 							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);
 							System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
 							badUtxos.add(utxoRemove);
-							
+							utxoPoolIndex++;
 						}
 						
 					}
-					utxoPoolIndex++;
-//					else {
-//						for (Transaction.Output  output2  : outputs ) {
-//							if (output2.equals(output )) {
-//								
-//							}
-//						}
-//						ok = false;
-//						this.utxoPool.removeUTXO(utxo);
-//					}
+					else {
+						spentUtxos.add(utxo);
+						for (Transaction.Output output : outputs) {
+//							System.out.println("Transaction hash: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+//							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);
+//							System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+//							badUtxos.add(utxoRemove);
+							utxoPoolIndex++;
+						}
+					}
+					
+
 					
 				}
 
@@ -173,13 +179,18 @@ public class TxHandler {
 				}
 				
 				
-//				utxoPoolIndex++;
+
 			}
     		
 		}
     	for (UTXO utxo : badUtxos) {
 			this.utxoPool.removeUTXO(utxo);
 		}
+//    	System.out.println("UTXOpool after:");
+//    	for (UTXO utxo : this.utxoPool.getAllUTXO()) {
+//    		Transaction.Output output = this.utxoPool.getTxOutput(utxo);
+//			System.out.println("------------Address: " + output.address + ", value: " + output.value);
+//		}
     	Transaction[] transactions = new Transaction[goodTransactions.size()];
     	int i = 0;
     	for (Transaction transaction2 : goodTransactions) {
