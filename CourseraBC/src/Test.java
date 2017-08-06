@@ -79,7 +79,7 @@ public class Test {
         // the coin from Scrooge.
         TxHandler txHandler = new TxHandler(utxoPool);
         
-        System.out.println("txHandler.isValidTx(tx3) returns: " + txHandler.isValidTx(tx3));
+        System.out.println("txHandler.isValidTx(tx3) returns: " + txHandler.isValidTx(tx2));
         System.out.println("TxHandlers UTXOpool  contains: " + txHandler.utxoPool.getAllUTXO().size() + " UTXO(s)");
         System.out.println("txHandler.handleTxs(transactions) returns: " +
                 txHandler.handleTxs(transactions).length +  " transaction(s)");
