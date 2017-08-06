@@ -42,7 +42,7 @@ public class Transaction {
             address = addr;
         }
     }
-
+    // Test branch Validation Transaction
     /** hash of the transaction, its unique id */
     private byte[] hash;
     private ArrayList<Input> inputs;
