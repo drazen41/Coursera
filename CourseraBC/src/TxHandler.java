@@ -160,20 +160,30 @@ public class TxHandler {
 						
 					}
 					else {
-						spentUtxos.add(utxo);
-						ArrayList<Transaction.Output> outputs2 = new ArrayList<Transaction.Output>();
+						if (this.utxoPool.contains(utxo)) {
+							spentUtxos.add(utxo);
+						}
+						else {
+							ok = false;
+							badUtxos.add(utxo);
+						}
+						
+//						ArrayList<Transaction.Output> outputs2 = new ArrayList<Transaction.Output>();
 						for (Transaction.Output output : outputs) {
-							System.out.println("Utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
-							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);
-							Transaction.Output output2 = this.utxoPool.getTxOutput(utxoRemove);
-							if (outputs2.contains(output2)) {
-								ok = false;
-								badUtxos.add(utxoRemove);
-								
-							}
-							else {
-								outputs2.add(output2);
-							}
+//							System.out.println("Utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
+//							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);
+//							Transaction.Output output2 = this.utxoPool.getTxOutput(utxoRemove);
+//							if (outputs2.contains(output2)) {
+//								ok = false;
+//								badUtxos.add(utxoRemove);
+//								
+//							}
+//							else {
+//								if (output2 !=  null) {
+//									outputs2.add(output2);
+//								}
+//								
+//							}
 							
 							
 							utxoPoolIndex++;

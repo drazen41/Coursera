@@ -48,23 +48,30 @@ public class Test {
         UTXO utxo4 = new UTXO(tx2.getHash(),3); // 2 coins of Alice
         System.out.println("OK utxo: " + tx2.getHash() + ", " + utxo4.getIndex());
         utxoPool.addUTXO(utxo4, tx2.getOutput(2));
-        UTXO utxo6 = new UTXO(tx2.getHash(),4); 
-        System.out.println("Bad utxo: " + tx2.getHash() + ", " + utxo6.getIndex());
-        utxoPool.addUTXO(utxo6, tx2.getOutput(2)); //utxo6 claims output by utxo4 in same tx
+//        UTXO utxo6 = new UTXO(tx2.getHash(),4); 
+//        System.out.println("Bad utxo: " + tx2.getHash() + ", " + utxo6.getIndex());
+//        utxoPool.addUTXO(utxo6, tx2.getOutput(2)); //utxo6 claims output by utxo4 in same tx
         
         // Double spend transaction - trying to spend coins from tx which tx2 already had spent        
         Main.Tx tx3 = new Main.Tx();
         tx3.addInput(tx.getHash(), 0);
         tx3.addOutput(5, pk_bob.getPublic());
         tx3.signTx(pk_scrooge.getPrivate(), 0);
-        UTXO utxo5 = new UTXO(tx3.getHash(),5); 
+        UTXO utxo5 = new UTXO(tx3.getHash(),4); 
         System.out.println("Double spend utxo: " + tx3.getHash() + ", " + utxo5.getIndex());
-        utxoPool.addUTXO(utxo5, tx3.getOutput(0));
+//        utxoPool.addUTXO(utxo5, tx3.getOutput(0));
         
-        // Double spend transaction - trying to spend coins from tx2 two times
+        // Transaction can reference another in the same block        
+        Main.Tx k = new Main.Tx();
+        k.addInput(tx2.getHash(), 0);
+        k.addOutput(0.5, pk_scrooge.getPublic());
+        k.addOutput(0.3, pk_bob.getPublic());
         
-        Main.Tx tx4 = new Main.Tx();
-        tx4.addInput(tx2.getHash(), 0);
+        
+        
+        Main.Tx q = new Main.Tx();
+        q.addInput(tx2.getHash(), 0);
+       
         
         
         Transaction[] transactions = new Transaction[10];
