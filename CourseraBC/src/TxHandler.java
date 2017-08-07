@@ -130,10 +130,11 @@ public class TxHandler {
 				
 				for (int j = 0; j < outputs.size(); j++) {
 					UTXO utxo = new UTXO(transaction.getHash(), j);
-					
+					System.out.println("Utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
 					if (this.utxoPool.contains(utxo)) {
 //						this.utxoPool.removeUTXO(utxo);
 						badUtxos.add(utxo);
+						utxoPoolIndex++;
 					}
 				}
 			}
@@ -149,9 +150,10 @@ public class TxHandler {
 					if (spentUtxos.contains(utxo)) {
 						ok = false;						
 						for (Transaction.Output output : outputs) {
-//							System.out.println("Transaction hash: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+							System.out.println("Utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
+						
 							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);							
-							System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+//							System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
 							badUtxos.add(utxoRemove);
 							utxoPoolIndex++;
 						}
@@ -161,17 +163,18 @@ public class TxHandler {
 						spentUtxos.add(utxo);
 						ArrayList<Transaction.Output> outputs2 = new ArrayList<Transaction.Output>();
 						for (Transaction.Output output : outputs) {
-							System.out.println("Transaction hash: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+							System.out.println("Utxo: " + transaction.getHash() + ", " + utxoPoolIndex);
 							UTXO utxoRemove = new UTXO(transaction.getHash(),utxoPoolIndex);
 							Transaction.Output output2 = this.utxoPool.getTxOutput(utxoRemove);
 							if (outputs2.contains(output2)) {
 								ok = false;
 								badUtxos.add(utxoRemove);
+								
 							}
 							else {
 								outputs2.add(output2);
 							}
-							System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+							
 							
 							utxoPoolIndex++;
 						}
@@ -192,7 +195,9 @@ public class TxHandler {
     		
 		}
     	for (UTXO utxo : badUtxos) {
-			this.utxoPool.removeUTXO(utxo);
+//    		System.out.println("Removing utxo: " + transaction.getHash() + ", at: " + utxoPoolIndex);
+//    		System.out.println("Bad utxo txTash: " + utxo.getTxHash());
+    		this.utxoPool.removeUTXO(utxo);
 		}
 //    	System.out.println("UTXOpool after:");
 //    	for (UTXO utxo : this.utxoPool.getAllUTXO()) {

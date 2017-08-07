@@ -48,7 +48,7 @@ public class Test {
         UTXO utxo4 = new UTXO(tx2.getHash(),3); // 2 coins of Alice
         System.out.println("OK utxo: " + tx2.getHash() + ", " + utxo4.getIndex());
         utxoPool.addUTXO(utxo4, tx2.getOutput(2));
-        UTXO utxo6 = new UTXO(tx2.getHash(),5); 
+        UTXO utxo6 = new UTXO(tx2.getHash(),4); 
         System.out.println("Bad utxo: " + tx2.getHash() + ", " + utxo6.getIndex());
         utxoPool.addUTXO(utxo6, tx2.getOutput(2)); //utxo6 claims output by utxo4 in same tx
         
@@ -57,7 +57,7 @@ public class Test {
         tx3.addInput(tx.getHash(), 0);
         tx3.addOutput(5, pk_bob.getPublic());
         tx3.signTx(pk_scrooge.getPrivate(), 0);
-        UTXO utxo5 = new UTXO(tx3.getHash(),4); 
+        UTXO utxo5 = new UTXO(tx3.getHash(),5); 
         System.out.println("Double spend utxo: " + tx3.getHash() + ", " + utxo5.getIndex());
         utxoPool.addUTXO(utxo5, tx3.getOutput(0));
         
