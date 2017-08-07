@@ -113,55 +113,41 @@ public class TxHandler {
     	// 1. Find output in utxoPool and add to spentUtxos for removing from utxoPool, outputs
     	
     	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
+    	UTXOPool utxoPoolAdd = new UTXOPool();
+    	UTXOPool utxoPoolRemove = new UTXOPool();
     	int outputIndex = 0;
     	for (Transaction transaction : possibleTxs) {
-			if (isValidTx(transaction)) {
+    		if (isValidTx(transaction)) {
 				// Find output in utxoPool
-				for (Transaction.Input input  : transaction.getInputs()) {
-					UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-//					if (utxo != null) {
-//						System.out.println("Removing utxo from pool: " + input.prevTxHash + ", " + input.outputIndex);
-//						
-//					} 
-					// Removing utxo from pool
-					if (this.utxoPool.contains(utxo)) {
-//						System.out.println("Removing utxo from pool: " + utxo.getTxHash() + ", " + utxo.getIndex());
-						this.utxoPool.removeUTXO(utxo);
-						goodTransactions.add(transaction);
-					}
-//        			Transaction.Output output = this.utxoPool.getTxOutput(utxo);
-					
-					
-				}
-				for (Transaction.Output output : transaction.getOutputs()) {
-					UTXO utxo = new UTXO(transaction.getHash(), outputIndex);
-					this.utxoPool.addUTXO(utxo, output);
-					
-					
-					
-					outputIndex++;					
-				}
-				
-				
-				
-				
-			} else {
+    			for (Transaction.Input input  : transaction.getInputs()) {
+    				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
 
-			}
+    				// Removing utxo from pool
+    				if (this.utxoPool.contains(utxo)) {
+//    					System.out.println("Removing utxo from pool: " + utxo.getTxHash() + ", " + utxo.getIndex());
+    					this.utxoPool.removeUTXO(utxo);
+    					goodTransactions.add(transaction);
+    				}
+
+    				
+    				
+    			}
+    			for (Transaction.Output output : transaction.getOutputs()) {
+    				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);
+    				utxoPoolAdd.addUTXO(utxo, output );
+//    				this.utxoPool.addUTXO(utxo, output);
+    				
+    				
+    				
+    				outputIndex++;					
+    			}
+				
+				
+				
+				
+			} 
     		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
-    		
+  		
 		}
     	
     	

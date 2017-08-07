@@ -15,6 +15,7 @@ public class Test2 {
         byte[] initialHash = BigInteger.valueOf(0).toByteArray();
         tx0.addInput(initialHash, 0);
         tx0.signTx(pk_scrooge.getPrivate(), 0);
+        
         /* ****************** Scenario 1. - The transaction output of the root transaction is the initial unspent output. */
         UTXOPool utxoPool = new UTXOPool();
         UTXO utxo = new UTXO(tx0.getHash(),0);
@@ -47,45 +48,52 @@ public class Test2 {
 			System.out.println(output.address.toString() + ": " + output.value);
 //        	System.out.println("UTXO in pool after: " + utxo2.getTxHash() + ", " + utxo2.getIndex());
 		}
+		/* *************************************************************************************************** */
+		utxoPool = new UTXOPool();
+		UTXO utxo2 = new UTXO(tx1.getHash(), 0);
+		utxoPool.addUTXO(utxo2, tx1.getOutput(0));
+		UTXO utxo3 = new UTXO(tx1.getHash(), 1);
+		utxoPool.addUTXO(utxo3, tx1.getOutput(1));
+		UTXO utxo4 = new UTXO(tx1.getHash(), 2);
+		utxoPool.addUTXO(utxo4, tx1.getOutput(2));
+		Main.Tx kTx = new Main.Tx();
+		kTx.addInput(tx1.getHash(), 0);
+		kTx.addInput(tx1.getHash(), 1);		
+		kTx.addOutput(0.5, pk_bob.getPublic());
+		kTx.addOutput(0.8, pk_bob.getPublic());
+		kTx.addOutput(3, pk_scrooge.getPublic());
+		kTx.signTx(pk_alice.getPrivate(), 0);
+		kTx.signTx(pk_alice.getPrivate(), 1);
+		
+		
+		Main.Tx qTx = new Main.Tx();
+		qTx.addInput(kTx.getHash(), 1);
+		qTx.addOutput(1.2, pk_alice.getPublic());
+		qTx.signTx(pk_bob.getPrivate(), 0);
+		txHandler = new TxHandler(utxoPool);
+		
+		Transaction[] transactions = new Transaction[5];
+		transactions[0] = qTx;
 		
 		
 		
+		System.out.println("txHandler.isValidTx(kTx) returns: " + txHandler.isValidTx(kTx));
+        for (UTXO utxo11 : txHandler.utxoPool.getAllUTXO()) {
+			Transaction.Output output = txHandler.utxoPool.getTxOutput(utxo11);
+			System.out.println(output.address.toString() + ": " + output.value);
+//        	System.out.println("UTXO in pool before: " + utxo2.getTxHash() + ", " + utxo2.getIndex());
+		}
+        System.out.println("txHandler.handleTxs(transactions) returns: " +
+            txHandler.handleTxs(transactions).length + " transaction(s)");
+        for (UTXO utxo11 : txHandler.utxoPool.getAllUTXO()) {
+			Transaction.Output output = txHandler.utxoPool.getTxOutput(utxo11);
+			System.out.println(output.address.toString() + ": " + output.value);
+//        	System.out.println("UTXO in pool after: " + utxo2.getTxHash() + ", " + utxo2.getIndex());
 		
 		
+        }
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	
 		
 	}
 }
