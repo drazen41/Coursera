@@ -54,10 +54,17 @@ public class TxHandler {
         					if (input.prevTxHash.length == 1) {
 								return true; // genesis 
 							}
+        					else { // transaction which is using output from previos tx
+								
+							}
 						}
-        				usedOutputs.add(output);
+        				else {
+        					usedOutputs.add(output);
+        					inputSum += output.value ;
+						}
+        				
         			}
-        			inputSum += output.value ;
+        			
         			
         			Transaction.Output output2 = tx.getOutput(input.outputIndex );
         			
@@ -103,6 +110,20 @@ public class TxHandler {
     	return ok;
     }
 
+    public boolean isValidTxClean(Transaction tx) {
+        // IMPLEMENT THIS
+    	boolean ok = true;   	   	
+    	ArrayList<Transaction.Input> inputs = tx.getInputs();
+    	ArrayList<Transaction.Output > outputs = tx.getOutputs();
+    	int i = 0;
+    	double inputSum = 0;
+    	double outputSum = 0;
+    	
+    	
+    	
+    	return ok;
+    }
+
     /**
      * Handles each epoch by receiving an unordered array of proposed transactions, checking each
      * transaction for correctness, returning a mutually valid array of accepted transactions, and
@@ -114,41 +135,72 @@ public class TxHandler {
     	
     	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
     	UTXOPool utxoPoolAdd = new UTXOPool();
-    	UTXOPool utxoPoolRemove = new UTXOPool();
+    	UTXOPool utxoPoolPossible = new UTXOPool(this.utxoPool);
+    	
+    	ArrayList<UTXO> usedUtxos = new ArrayList<UTXO>();
     	int outputIndex = 0;
-    	for (Transaction transaction : possibleTxs) {
-    		if (isValidTx(transaction)) {
-				// Find output in utxoPool
-    			for (Transaction.Input input  : transaction.getInputs()) {
-    				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-
-    				// Removing utxo from pool
-    				if (this.utxoPool.contains(utxo)) {
-//    					System.out.println("Removing utxo from pool: " + utxo.getTxHash() + ", " + utxo.getIndex());
-    					this.utxoPool.removeUTXO(utxo);
-    					goodTransactions.add(transaction);
-    				}
-
-    				
-    				
-    			}
-    			for (Transaction.Output output : transaction.getOutputs()) {
-    				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);
-    				utxoPoolAdd.addUTXO(utxo, output );
-//    				this.utxoPool.addUTXO(utxo, output);
-    				
-    				
-    				
-    				outputIndex++;					
-    			}
-				
-				
-				
-				
-			} 
+    	boolean ok = true;
+    	for (Transaction transaction : possibleTxs) {			
     		
-  		
+    		if (transaction == null) continue;						
+    		for (Transaction.Input input : transaction.getInputs()) {
+				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+				if (utxoPoolPossible.contains(utxo)) {
+					utxoPoolPossible.removeUTXO(utxo);
+					usedUtxos.add(utxo );
+				}
+				else {
+					if (usedUtxos.contains(utxo )) {
+						
+						ok = false;
+						continue;
+					}
+					
+				}
+				
+				
+				
+			}
+//    		for (Transaction.Output output : transaction.getOutputs()) {
+//				// Adding outputs to utxoPool
+//    			UTXO utxo = new UTXO(transaction.getHash(), index)
+//    			
+//			}
+    		if (ok) {
+    			goodTransactions.add(transaction);   			  			
+    		}
+    		else {
+				ok = true;
+			}
+
 		}
+    	
+//    	for (Transaction tx : goodTransactions) {
+//			try {
+//				if (!isValidTx(tx)) {
+//					goodTransactions.remove(tx);
+//					for (Transaction.Input input : tx.getInputs()) {
+//						UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+//						if (utxoPoolPossible.contains(utxo)) {
+//							utxoPoolPossible.removeUTXO(utxo);
+//						}
+//					}
+//				}
+//			} catch (Exception e) {
+//				// TODO: handle exception
+//				
+//			}
+//    		
+//		}
+    	this.utxoPool = new UTXOPool();
+    	for (UTXO utxo : utxoPoolPossible.getAllUTXO()) {
+    		Transaction.Output output = utxoPoolPossible.getTxOutput(utxo);
+//    		System.out.println(output.address.toString() + ", " + output.value );
+			this.utxoPool.addUTXO(utxo,output);
+		}
+    	
+    	
+
     	
     	
     	Transaction[] transactions = new Transaction[goodTransactions.size()];
