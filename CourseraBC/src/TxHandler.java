@@ -134,6 +134,7 @@ public class TxHandler {
     	// 1. Find output in utxoPool and add to spentUtxos for removing from utxoPool, outputs
     	
     	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
+    	ArrayList<Transaction> validTransactions = new ArrayList<Transaction>(); 
     	UTXOPool utxoPoolAdd = new UTXOPool();
     	UTXOPool utxoPoolPossible = new UTXOPool(this.utxoPool);
     	
@@ -141,8 +142,8 @@ public class TxHandler {
     	int outputIndex = 0;
     	boolean ok = true;
     	for (Transaction transaction : possibleTxs) {			
-    		
-    		if (transaction == null) continue;						
+    		if (transaction == null) continue;		
+    						
     		for (Transaction.Input input : transaction.getInputs()) {
 				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
 				if (utxoPoolPossible.contains(utxo)) {
@@ -175,23 +176,19 @@ public class TxHandler {
 
 		}
     	
-//    	for (Transaction tx : goodTransactions) {
-//			try {
-//				if (!isValidTx(tx)) {
-//					goodTransactions.remove(tx);
-//					for (Transaction.Input input : tx.getInputs()) {
-//						UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-//						if (utxoPoolPossible.contains(utxo)) {
-//							utxoPoolPossible.removeUTXO(utxo);
-//						}
-//					}
-//				}
-//			} catch (Exception e) {
-//				// TODO: handle exception
-//				
-//			}
-//    		
-//		}
+    	for (Transaction tx : goodTransactions) {			
+    		if (isValidTx(tx)) {
+    			validTransactions.add(tx);
+			}
+    		else {
+				for (Transaction.Input input : tx.getInputs()) {
+				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+					if (utxoPoolPossible.contains(utxo)) {
+						utxoPoolPossible.removeUTXO(utxo);
+					}
+				}
+			}
+		}
     	this.utxoPool = new UTXOPool();
     	for (UTXO utxo : utxoPoolPossible.getAllUTXO()) {
     		Transaction.Output output = utxoPoolPossible.getTxOutput(utxo);
@@ -205,7 +202,7 @@ public class TxHandler {
     	
     	Transaction[] transactions = new Transaction[goodTransactions.size()];
     	int i = 0;
-    	for (Transaction transaction2 : goodTransactions) {
+    	for (Transaction transaction2 : validTransactions) {
 			transactions[i] = transaction2 ;
     		i++;
 		}
