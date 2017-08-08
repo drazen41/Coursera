@@ -135,10 +135,10 @@ public class TxHandler {
     	
     	ArrayList<Transaction> goodTransactions = new ArrayList<Transaction>();
     	ArrayList<Transaction> validTransactions = new ArrayList<Transaction>(); 
-    	UTXOPool utxoPoolAdd = new UTXOPool();
+    	UTXOPool utxoPoolUsed = new UTXOPool();
     	UTXOPool utxoPoolPossible = new UTXOPool(this.utxoPool);
     	
-    	ArrayList<UTXO> usedUtxos = new ArrayList<UTXO>();
+    	
     	int outputIndex = 0;
     	boolean ok = true;
     	for (Transaction transaction : possibleTxs) {			
@@ -148,10 +148,11 @@ public class TxHandler {
 				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
 				if (utxoPoolPossible.contains(utxo)) {
 					utxoPoolPossible.removeUTXO(utxo);
-					usedUtxos.add(utxo );
+					utxoPoolUsed.addUTXO(utxo, transaction.getOutput(outputIndex));
+					outputIndex++;
 				}
 				else {
-					if (usedUtxos.contains(utxo )) {
+					if (utxoPoolUsed.contains(utxo )) {
 						
 						ok = false;
 						continue;
@@ -162,13 +163,21 @@ public class TxHandler {
 				
 				
 			}
-//    		for (Transaction.Output output : transaction.getOutputs()) {
-//				// Adding outputs to utxoPool
-//    			UTXO utxo = new UTXO(transaction.getHash(), index)
-//    			
-//			}
+    		outputIndex = 0;
+    		for (Transaction.Output  output  : transaction.getOutputs()) {
+				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);				
+    			if (utxoPoolUsed.contains(utxo)) {
+					ok = false;					
+				}
+    			else {
+					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
+				}
+				outputIndex++;
+			}
+    		
     		if (ok) {
-    			goodTransactions.add(transaction);   			  			
+    			goodTransactions.add(transaction);   	
+    			
     		}
     		else {
 				ok = true;
