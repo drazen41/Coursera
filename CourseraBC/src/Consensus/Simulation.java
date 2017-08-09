@@ -35,21 +35,25 @@ public class Simulation {
       // pick which nodes are malicious and which are compliant
       Node[] nodes = new Node[numNodes];
       for (int i = 0; i < numNodes; i++) {
-         if(Math.random() < p_malicious)
-            // When you are ready to try testing with malicious nodes, replace the
-            // instantiation below with an instantiation of a MaliciousNode
-            nodes[i] = new MaliciousNode(p_graph, p_malicious, p_txDistribution, numRounds);
+         if(Math.random() < p_malicious) {
+        	 // When you are ready to try testing with malicious nodes, replace the
+             // instantiation below with an instantiation of a MaliciousNode
+             nodes[i] = new MaliciousNode(p_graph, p_malicious, p_txDistribution, numRounds);
+          	//int abc = 0;
+         }
+           
          else
             nodes[i] = new CompliantNode(p_graph, p_malicious, p_txDistribution, numRounds);
       }
 
 
       // initialize random follow graph
+//      double randomNumber = Math.random(); -- values between 0 and 1
       boolean[][] followees = new boolean[numNodes][numNodes]; // followees[i][j] is true iff i follows j
       for (int i = 0; i < numNodes; i++) {
          for (int j = 0; j < numNodes; j++) {
             if (i == j) continue;
-            if(Math.random() < p_graph) { // p_graph is .1, .2, or .3
+            if(Math.random() < p_graph) { // p_graph is .1, .2, or .3, 
                followees[i][j] = true;
             }
          }
