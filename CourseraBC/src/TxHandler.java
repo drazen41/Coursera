@@ -170,7 +170,10 @@ public class TxHandler {
 					ok = false;					
 				}
     			else {
-					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
+    				if (ok) {
+    					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
+					}
+					
 				}
 				outputIndex++;
 			}

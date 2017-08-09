@@ -79,8 +79,8 @@ public class Test2 {
 		
 		TxHandler txHandler = new TxHandler(utxoPool);
 		Transaction[] transactions = new Transaction[5];
-		transactions[0] = kTx;
-		transactions[1] = qTx;
+		transactions[0] = qTx;
+		transactions[1] = kTx;
 		transactions[2] = doubleSpend;
 		
 		
