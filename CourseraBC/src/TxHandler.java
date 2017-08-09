@@ -137,13 +137,24 @@ public class TxHandler {
     	ArrayList<Transaction> validTransactions = new ArrayList<Transaction>(); 
     	UTXOPool utxoPoolUsed = new UTXOPool();
     	UTXOPool utxoPoolPossible = new UTXOPool(this.utxoPool);
+    	// Adding all outputs to poolPossible
+    	for (Transaction transaction : possibleTxs) {
+    		if (transaction == null) continue;
+    		int outputIndex = 0;
+    		for (Transaction.Output output : transaction.getOutputs()) {
+				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);
+				utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
+				outputIndex++;
+			}
+			
+		}
     	
     	
-    	int outputIndex = 0;
+    	
     	boolean ok = true;
     	for (Transaction transaction : possibleTxs) {			
     		if (transaction == null) continue;		
-    						
+    		int outputIndex = 0;				
     		for (Transaction.Input input : transaction.getInputs()) {
 				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
 				if (utxoPoolPossible.contains(utxo)) {
@@ -153,8 +164,13 @@ public class TxHandler {
 				}
 				else {
 					if (utxoPoolUsed.contains(utxo )) {
-						
+						UTXO utxo2 = new UTXO(transaction.getHash(), outputIndex);
+						Transaction.Output output = utxoPoolPossible.getTxOutput(utxo2);
+						if (utxoPoolPossible.contains(utxo2)) {
+							utxoPoolPossible.removeUTXO(utxo2);
+						}
 						ok = false;
+						outputIndex++;
 						continue;
 					}
 					
@@ -163,20 +179,20 @@ public class TxHandler {
 				
 				
 			}
-    		outputIndex = 0;
-    		for (Transaction.Output  output  : transaction.getOutputs()) {
-				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);				
-    			if (utxoPoolUsed.contains(utxo)) {
-					ok = false;					
-				}
-    			else {
-    				if (ok) {
-    					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
-					}
-					
-				}
-				outputIndex++;
-			}
+//    		outputIndex = 0;
+//    		for (Transaction.Output  output  : transaction.getOutputs()) {
+//				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);				
+//    			if (utxoPoolUsed.contains(utxo)) {
+//					ok = false;					
+//				}
+//    			else {
+//    				if (ok) {
+//    					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
+//					}
+//					
+//				}
+//				outputIndex++;
+//			}
     		
     		if (ok) {
     			goodTransactions.add(transaction);   	
