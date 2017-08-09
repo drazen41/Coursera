@@ -61,21 +61,27 @@ public class Test2 {
 		kTx.addInput(tx1.getHash(), 1);		
 		kTx.addOutput(0.5, pk_bob.getPublic());
 		kTx.addOutput(0.8, pk_bob.getPublic());
-		kTx.addOutput(3, pk_scrooge.getPublic());
+		kTx.addOutput(1.4, pk_scrooge.getPublic());
 		kTx.signTx(pk_alice.getPrivate(), 0);
 		kTx.signTx(pk_alice.getPrivate(), 1);
 		
 		
 		Main.Tx qTx = new Main.Tx();
 		qTx.addInput(kTx.getHash(), 1);
-		qTx.addOutput(1.2, pk_alice.getPublic());
+		qTx.addOutput(1.22, pk_alice.getPublic());
 		qTx.signTx(pk_bob.getPrivate(), 0);
-		TxHandler txHandler = new TxHandler(utxoPool);
 		
+		// Here comes double spend
+		Main.Tx doubleSpend  = new Main.Tx();
+		doubleSpend.addInput(kTx.getHash(), 1);
+		doubleSpend.addOutput(1.111, pk_scrooge.getPublic());
+		doubleSpend.signTx(pk_bob.getPrivate(), 0);
+		
+		TxHandler txHandler = new TxHandler(utxoPool);
 		Transaction[] transactions = new Transaction[5];
-		transactions[0] = kTx;
-//		transactions[1] = qTx;
-//		transactions[2] = qTx;
+		transactions[0] = doubleSpend;
+		transactions[1] = kTx;
+		transactions[2] = qTx;
 		
 		
 		
