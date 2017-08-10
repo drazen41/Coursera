@@ -100,12 +100,13 @@ public class MaxFeeTxHandler {
 			if (!isValidTx(transaction)) {
 				continue;
 			}
-			goodTransactions.add(transaction);
+			
 			for (Transaction.Input input : transaction.getInputs()) {
 				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
 				if (this.utxoPool.contains(utxo)) {
 					Transaction.Output output = this.utxoPool.getTxOutput(utxo);
 					txFee += output.value;
+					goodTransactions.add(transaction);
 				}
 					
 			}
