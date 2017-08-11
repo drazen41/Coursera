@@ -14,6 +14,7 @@ public class CompliantNode implements Node {
     private Node[] nodes ;
     private boolean[] myFollowees;
     private Set<Transaction > transactionsToFollowers;
+    private Set<Transaction> consensus;
     private Set<Transaction> pendingTransactions;
     private HashSet<Candidate > proposals;
     private int numberOfRounds;
@@ -47,13 +48,10 @@ public class CompliantNode implements Node {
     	if (round == 0) {
     		return this.pendingTransactions;
 		} else {
-			if (round < 9) {
-				return transactionsToFollowers;
-			} else {
-				System.out.println("Round 10");
-				return null;
-			}
+			// 1. calculate consensus
 			
+			// 2. return consensus
+			return consensus;
 		}
     	
     }
@@ -63,32 +61,13 @@ public class CompliantNode implements Node {
     	
     	for (Candidate candidate : candidates) {
 			if (candidate.tx == null) continue;
-//    		if (myFollowees[candidate.sender] == true && pendingTransactions.contains(candidate.tx) ) {
-////				if (numberOfRounds < 10) {
-////					transactionsToFollowers.add(candidate.tx );
-////					round++;
-////				} else {
-////					// make consensus (transaction to followers), i.e. where number of transaction is greater than 1
-////				}
-////    			System.out.println("Transaction number: " + candidate.tx.id + " from " + candidate.sender + "in my transaction.");
-//    			this.transactionsToFollowers.add(candidate.tx);
-//    			round++;
-//			}
-			if (myFollowees[candidate.sender]) {
-				if (round == 0) {
-					if (pendingTransactions.contains(candidate.tx)) {
-						this.transactionsToFollowers.add(candidate.tx);
-					}					
-				}
-				else {
-					if (transactionsToFollowers.contains(candidate.tx)) {
-//						this.transactionsToFollowers.add(candidat)
-					}
-				}
-				
-				
+    		if (myFollowees[candidate.sender] == true) {
+
+    			this.transactionsToFollowers.add(candidate.tx);
+    			
 			}
+
 		}
-    	
+    	round++;
     }
 }
