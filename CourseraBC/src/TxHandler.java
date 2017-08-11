@@ -214,6 +214,9 @@ public class TxHandler {
 					if (utxoPoolPossible.contains(utxo)) {
 						utxoPoolPossible.removeUTXO(utxo);
 					}
+					if (utxoPoolUsed.contains(utxo)) {
+						utxoPoolUsed.removeUTXO(utxo);
+					}
 				}
 			}
 		}
