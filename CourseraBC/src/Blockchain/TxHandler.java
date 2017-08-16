@@ -8,7 +8,7 @@ import java.util.Collections;
 
 public class TxHandler {
 
-   public UTXOPool utxoPool ;
+   private UTXOPool utxoPool ;
 	/**
      * Creates a public ledger whose current UTXOPool (collection of unspent transaction outputs) is
      * {@code utxoPool}. This should make a copy of utxoPool by using the UTXOPool(UTXOPool uPool)
@@ -131,6 +131,7 @@ public class TxHandler {
      * updating the current UTXO pool as appropriate.
      */
     public Transaction[] handleTxs(Transaction[] possibleTxs) {
+
         // IMPLEMENT THIS
     	// 1. Find output in utxoPool and add to spentUtxos for removing from utxoPool, outputs
     	
@@ -180,20 +181,7 @@ public class TxHandler {
 				
 				
 			}
-//    		outputIndex = 0;
-//    		for (Transaction.Output  output  : transaction.getOutputs()) {
-//				UTXO utxo = new UTXO(transaction.getHash(), outputIndex);				
-//    			if (utxoPoolUsed.contains(utxo)) {
-//					ok = false;					
-//				}
-//    			else {
-//    				if (ok) {
-//    					utxoPoolPossible.addUTXO(utxo, transaction.getOutput(outputIndex));
-//					}
-//					
-//				}
-//				outputIndex++;
-//			}
+
     		
     		if (ok) {
     			goodTransactions.add(transaction);   	
@@ -242,5 +230,8 @@ public class TxHandler {
     	
     	return transactions ;
     }
+    public UTXOPool  getUTXOPool() {
+		return this.utxoPool;
+	}
 
 }

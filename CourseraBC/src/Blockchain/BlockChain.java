@@ -2,6 +2,7 @@ package Blockchain;
 
 import java.awt.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -14,7 +15,7 @@ public class BlockChain {
     public static final int CUT_OFF_AGE = 10;
     private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
-   
+    private TxHandler txHandler = null;
     /**
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
      * block
@@ -26,6 +27,11 @@ public class BlockChain {
     	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
     	blockChain = new TreeNode<Block>(genesisBlock );
     	
+    	Transaction transaction = genesisBlock.getCoinbase();
+    	UTXOPool utxoPool = new UTXOPool();
+    	UTXO utxo = new UTXO(transaction.getHash(), 0);
+    	utxoPool.addUTXO(utxo,transaction.getOutput(0));   	
+    	txHandler = new TxHandler(utxoPool);
     	
     }
 
@@ -34,8 +40,8 @@ public class BlockChain {
         // IMPLEMENT THIS
 //    	Block block = new Block(prevHash, address);
     	blockChain.getHeight(blockChain);
-    	
-    	return null;
+    	Map.Entry<String , Block> block =  blocks.lastEntry();
+    	return block.getValue();
     }
 
     /** Get the UTXOPool for mining a new block on top of max height block */
@@ -65,12 +71,20 @@ public class BlockChain {
     public boolean addBlock(Block block) {
         // IMPLEMENT THIS
     	boolean ok = false;
+    	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
     	if (block.getHash() == null) {
 			return false;
 		}
-    	for (Transaction tx : block.getTransactions()) {
-			
+    	int i = 0;
+    	for (Transaction transaction : block.getTransactions()) {
+			transactions[i] = transaction;
+    		i++;
 		}
+    	
+    	TransactionPool transactionPool = new TransactionPool();
+    	for (Transaction transaction : this.txHandler.handleTxs(transactions )) {
+			transactionPool.addTransaction(transaction );
+		} 
     	blocks.put(block.getHash().toString(), block);
     	ok = true;
     	return ok;
