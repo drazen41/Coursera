@@ -16,22 +16,27 @@ public class BlockChain {
     private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
     private TxHandler txHandler = null;
+    TransactionPool transactionPool = null;
     /**
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
      * block
      */
     public BlockChain(Block genesisBlock) {
         // IMPLEMENT THIS
-    	blocks = new TreeMap<String ,Block>();
-    	
-    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
-    	blockChain = new TreeNode<Block>(genesisBlock );
-    	
+    	transactionPool = new TransactionPool();
     	Transaction transaction = genesisBlock.getCoinbase();
+    	addTransaction(transaction );
     	UTXOPool utxoPool = new UTXOPool();
     	UTXO utxo = new UTXO(transaction.getHash(), 0);
     	utxoPool.addUTXO(utxo,transaction.getOutput(0));   	
     	txHandler = new TxHandler(utxoPool);
+    	
+    	
+    	blocks = new TreeMap<String ,Block>();  	
+    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
+    	blockChain = new TreeNode<Block>(genesisBlock );
+    	
+    	
     	
     }
 
@@ -53,7 +58,7 @@ public class BlockChain {
     /** Get the transaction pool to mine a new block */
     public TransactionPool getTransactionPool() {
         // IMPLEMENT THIS
-    	return null;
+    	return this.transactionPool;
     }
 
     /**
@@ -68,24 +73,31 @@ public class BlockChain {
      * 
      * @return true if block is successfully added
      */
+    // Blockchain height ????
     public boolean addBlock(Block block) {
         // IMPLEMENT THIS
     	boolean ok = false;
     	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
-    	if (block.getHash() == null) {
+    	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
+    	// maintain a UTXO pool corresponding to every block on top of which a new block might be created - znaèi ZA SVAKI BLOK
+    	// 1. put block on top
+    	blocks.put(block.getHash().toString(), block);
+    	// 2. 
     	int i = 0;
     	for (Transaction transaction : block.getTransactions()) {
-			transactions[i] = transaction;
+			if (!txHandler.isValidTx(transaction))
+				return false;
+    		transactions[i] = transaction;
     		i++;
 		}
     	
-    	TransactionPool transactionPool = new TransactionPool();
+    	
     	for (Transaction transaction : this.txHandler.handleTxs(transactions )) {
-			transactionPool.addTransaction(transaction );
+			transactionPool.removeTransaction(transaction.getHash());
 		} 
-    	blocks.put(block.getHash().toString(), block);
+    	
     	ok = true;
     	return ok;
     }
@@ -93,6 +105,7 @@ public class BlockChain {
     /** Add a transaction to the transaction pool */
     public void addTransaction(Transaction tx) {
         // IMPLEMENT THIS
+    	this.transactionPool.addTransaction(tx);
     }
 }
 final class TreeNode<T> {
