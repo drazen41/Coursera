@@ -1,6 +1,8 @@
 package Blockchain;
 
 import java.awt.List;
+import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +17,7 @@ public class BlockChain {
     public static final int CUT_OFF_AGE = 10;
     private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
-    private TxHandler txHandler = null;
+//    private TxHandler txHandler = null;
     TransactionPool transactionPool = null;
     /**
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
@@ -29,12 +31,13 @@ public class BlockChain {
     	UTXOPool utxoPool = new UTXOPool();
     	UTXO utxo = new UTXO(transaction.getHash(), 0);
     	utxoPool.addUTXO(utxo,transaction.getOutput(0));   	
-    	txHandler = new TxHandler(utxoPool);
+//    	txHandler = new TxHandler(utxoPool);
     	
     	
     	blocks = new TreeMap<String ,Block>();  	
     	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
     	blockChain = new TreeNode<Block>(genesisBlock );
+    	blockChain.setTxHandler(utxoPool);
     	
     	
     	
@@ -87,16 +90,16 @@ public class BlockChain {
     	// 2. 
     	int i = 0;
     	for (Transaction transaction : block.getTransactions()) {
-			if (!txHandler.isValidTx(transaction))
+			if (!this.blockChain.txHandler.isValidTx(transaction))
 				return false;
     		transactions[i] = transaction;
     		i++;
 		}
     	
     	
-    	for (Transaction transaction : this.txHandler.handleTxs(transactions )) {
-			transactionPool.removeTransaction(transaction.getHash());
-		} 
+//    	for (Transaction transaction : this.txHandler.handleTxs(transactions )) {
+//			transactionPool.removeTransaction(transaction.getHash());
+//		} 
     	
     	ok = true;
     	return ok;
@@ -109,28 +112,85 @@ public class BlockChain {
     }
 }
 final class TreeNode<T> {
-	private ArrayList<TreeNode<T>> children = new ArrayList<TreeNode<T>>();
-	private T data = null;
-	public TreeNode(T data) {
+	private ArrayList<TreeNode<Block>> children = new ArrayList<TreeNode<Block>>();
+	private Block data = null;
+//	private UTXOPool utxoPool;
+	public TxHandler txHandler = null;
+	private LocalDateTime localDateTime = null;
+	private LocalDateTime tempDate = null;
+	private int treeHeight = 0;
+	private int maxHeight = 0;
+	public TreeNode<Block> lastNode = null;
+	public TreeNode(Block data) {
 		this.data = data;
+		this.localDateTime = LocalDateTime.now();
 	}
-	public ArrayList<TreeNode<T>> getChildren(){
+	public ArrayList<TreeNode<Block>> getChildren(){
 		return children;
 	}
-	public void setChild(TreeNode<T> children) {
-		this.children.add(children);
+	public void setChild(TreeNode<Block> child) {
+		this.children.add(child);
 	}
-	public Integer getHeight(TreeNode<T> root) {
+	public void setTxHandler(UTXOPool utxoPool) {
+		this.txHandler = new TxHandler(utxoPool);
+	}
+	public Integer getHeight(TreeNode<Block> root) {
 		if (root == null) {
 			return 0;
 		}
 		Integer hInteger = 0;
-		for(TreeNode<T> n : root.getChildren()){
+		for(TreeNode<Block> n : root.getChildren()){
             hInteger = Math.max(hInteger, getHeight(n));
         }
         return hInteger+1;
 	}
-	
+	public Block getBlock() {
+		return this.data;
+	}
+	public TreeNode<Block> getMaxHeightBlock(TreeNode<Block> root) {
+//		LocalDateTime tempDate = null;		
+//		ArrayList<TreeNode> blocks  = new ArrayList<TreeNode>();
+//		for(TreeNode<Block> n : root.getChildren()){
+//           blocks.add(n);
+//           
+//        }
+//		for (TreeNode treeNode : blocks) {
+//			
+//		}
+//		TreeNode<Block> node = lastNode;
+//		int maxHeight = 0;
+//		int treeHeight = 0;
+		treeHeight++;
+		for (TreeNode<Block> treeNode : root.getChildren()) {
+				
+			if (treeNode.getChildren().size() > 0) {
+				
+				lastNode = getMaxHeightBlock(treeNode);
+			} else {
+				
+				if (treeHeight > maxHeight) {
+					treeHeight++;
+					maxHeight = treeHeight;
+					lastNode = treeNode;
+					tempDate = treeNode.localDateTime;
+				} else {
+					if (tempDate == null) {
+						tempDate = treeNode.localDateTime;
+						lastNode = treeNode;
+					} else {
+						if (treeNode.localDateTime.isAfter(tempDate)) {
+							tempDate = treeNode.localDateTime;
+							lastNode = treeNode;
+						} else {
+
+						}
+					}
+				}
+			}
+			
+		}
+		return lastNode;
+	}
 	
 	
 	
