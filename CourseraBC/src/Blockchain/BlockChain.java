@@ -143,42 +143,33 @@ final class TreeNode<T> {
             hInteger = Math.max(hInteger, getHeight(n));
         }
         return hInteger+1;
+//		return this.maxHeight;
 	}
 	public Block getBlock() {
 		return this.data;
 	}
-	public TreeNode<Block> getMaxHeightBlock(TreeNode<Block> root) {
-//		LocalDateTime tempDate = null;		
-//		ArrayList<TreeNode> blocks  = new ArrayList<TreeNode>();
-//		for(TreeNode<Block> n : root.getChildren()){
-//           blocks.add(n);
-//           
-//        }
-//		for (TreeNode treeNode : blocks) {
-//			
-//		}
-//		TreeNode<Block> node = lastNode;
-//		int maxHeight = 0;
-//		int treeHeight = 0;
+	public TreeNode<Block> getMaxHeightNode(TreeNode<Block> root) {
+
 		treeHeight++;
 		for (TreeNode<Block> treeNode : root.getChildren()) {
 				
 			if (treeNode.getChildren().size() > 0) {
 				
-				lastNode = getMaxHeightBlock(treeNode);
+				lastNode = getMaxHeightNode(treeNode);
 			} else {
 				
 				if (treeHeight > maxHeight) {
 					treeHeight++;
 					maxHeight = treeHeight;
 					lastNode = treeNode;
+					lastNode.maxHeight = treeHeight;
 					tempDate = treeNode.localDateTime;
 				} else {
 					if (tempDate == null) {
 						tempDate = treeNode.localDateTime;
 						lastNode = treeNode;
 					} else {
-						if (treeNode.localDateTime.isAfter(tempDate)) {
+						if (treeHeight >= maxHeight && treeNode.localDateTime.isAfter(tempDate)) {
 							tempDate = treeNode.localDateTime;
 							lastNode = treeNode;
 						} else {
@@ -189,10 +180,18 @@ final class TreeNode<T> {
 			}
 			
 		}
+		treeHeight--;
+		
 		return lastNode;
 	}
 	
-	
+	public Integer	getMaxHeight() {
+		if (lastNode != null) {
+			return lastNode.maxHeight;
+		} else {
+			return 0;
+		}
+	}
 	
 	
 	
