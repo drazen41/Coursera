@@ -9,15 +9,17 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.w3c.dom.NodeList;
+
 // Block Chain should maintain only limited block nodes to satisfy the functions
 // You should not have all the blocks added to the block chain in memory 
 // as it would cause a memory overflow.
 
 public class BlockChain {
     public static final int CUT_OFF_AGE = 10;
-    private TreeMap<String ,Block> blocks;
+//    private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
-//    private TxHandler txHandler = null;
+    private TxHandler txHandler = null;
     TransactionPool transactionPool = null;
     /**
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
@@ -31,13 +33,13 @@ public class BlockChain {
     	UTXOPool utxoPool = new UTXOPool();
     	UTXO utxo = new UTXO(transaction.getHash(), 0);
     	utxoPool.addUTXO(utxo,transaction.getOutput(0));   	
-//    	txHandler = new TxHandler(utxoPool);
+    	this.txHandler = new TxHandler(utxoPool);
     	
     	
-    	blocks = new TreeMap<String ,Block>();  	
-    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
+//    	blocks = new TreeMap<String ,Block>();  	
+//    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
     	blockChain = new TreeNode<Block>(genesisBlock );
-    	blockChain.setTxHandler(utxoPool);
+//    	blockChain.setTxHandler(utxoPool);
     	
     	
     	
@@ -47,15 +49,34 @@ public class BlockChain {
     public Block getMaxHeightBlock() {
         // IMPLEMENT THIS
 //    	Block block = new Block(prevHash, address);
-    	blockChain.getHeight(blockChain);
-    	Map.Entry<String , Block> block =  blocks.lastEntry();
-    	return block.getValue();
+//    	blockChain.getHeight(blockChain);
+//    	Map.Entry<String , Block> block =  blocks.lastEntry();
+//    	return block.getValue();
+    	TreeNode<Block> node = null;
+    	int height = this.blockChain.getHeight(blockChain);
+    	if (height == 1) {
+    		return this.blockChain.getBlock();
+		} else {
+			node = this.blockChain.getMaxHeightNode(blockChain);
+		}
+    	 
+    	return node.getBlock();
+    	
     }
 
     /** Get the UTXOPool for mining a new block on top of max height block */
     public UTXOPool getMaxHeightUTXOPool() {
         // IMPLEMENT THIS
-    	return null;
+//    	TreeNode<Block> node = null;
+//    	int height = this.blockChain.getHeight(blockChain);
+//    	if (height == 1) {
+//    		node = this.blockChain;
+//		} else {
+//			node = this.blockChain.getMaxHeightNode(blockChain);
+//		}
+//    	return node.txHandler.getUTXOPool();
+    	return this.txHandler.getUTXOPool();
+    	
     }
 
     /** Get the transaction pool to mine a new block */
@@ -84,24 +105,66 @@ public class BlockChain {
     	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
-    	// maintain a UTXO pool corresponding to every block on top of which a new block might be created - znaèi ZA SVAKI BLOK
+    	// maintain a UTXO pool corresponding to every block on top of which a new block might be created - 
     	// 1. put block on top
-    	blocks.put(block.getHash().toString(), block);
+//    	blocks.put(block.getHash().toString(), block);
     	// 2. 
     	int i = 0;
     	for (Transaction transaction : block.getTransactions()) {
-			if (!this.blockChain.txHandler.isValidTx(transaction))
+			if (!this.txHandler.isValidTx(transaction))
 				return false;
-    		transactions[i] = transaction;
+    		
+			
+			
+			transactions[i] = transaction;
     		i++;
 		}
-    	
-    	
-//    	for (Transaction transaction : this.txHandler.handleTxs(transactions )) {
-//			transactionPool.removeTransaction(transaction.getHash());
-//		} 
-    	
-    	ok = true;
+    	// Add block to block with previous hash, provjeri da li je maksimalna visina blockchaina - cut_off-age odgovara visini na kojoj je parent + 1
+    	// Ne moze se dodati block ispod parenta ako uvjet iznad nije zadovoljen (pronaci visinu parenta u blochainu)
+    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+    	int maxHeight = this.blockChain.getHeight(blockChain);
+        ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+        TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
+        int parentBlockHeight = parent.getBlockHeight();
+        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+			ok = false;
+		} else {
+			// Dodaj block parentu
+			treeNode.addTreeNodeToParent(parent);
+			if (parentBlockHeight >= maxHeight) {
+				this.txHandler.handleTxs(transactions);
+			}
+			// Transaction pool
+//			TransactionPool tPool = new TransactionPool();			
+//			for (Transaction tx1 : transactionPool.getTransactions()) {
+//				for (Transaction tx2 : parent.getBlock().getTransactions()) {
+//					if (tx1.equals(tx2)) {
+//						continue;
+//					} else {
+//						tPool.addTransaction(tx2);
+//					}
+//				}
+//			}
+//			this.transactionPool = tPool;
+			Block block2 = parent.getBlock();
+			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+			if (block2Coinbase != null) {
+				transactionPool.removeTransaction(block2Coinbase.getHash());
+			}	
+			
+			for (Transaction tx : block2.getTransactions()) {
+				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+				if (transaction != null) {
+					transactionPool.removeTransaction(tx.getHash());
+				}
+			}
+			addTransaction(block.getCoinbase());
+			for (Transaction tx : block.getTransactions()) {
+				addTransaction(tx);
+			}
+			
+			ok = true;
+		}
     	return ok;
     }
 
@@ -120,7 +183,10 @@ final class TreeNode<T> {
 	private LocalDateTime tempDate = null;
 	private int treeHeight = 0;
 	private int maxHeight = 0;
+	private int blockHeight = 0;
 	public TreeNode<Block> lastNode = null;
+	private TreeNode<Block> parentNode = null;
+//	private Transaction[] transactions = null;
 	public TreeNode(Block data) {
 		this.data = data;
 		this.localDateTime = LocalDateTime.now();
@@ -193,7 +259,54 @@ final class TreeNode<T> {
 		}
 	}
 	
-	
-	
+	public boolean addTreeNodeToBlockchain(int cut_off_age, TreeNode<Block> root) {
+		boolean added = false;
+		if (root.getChildren().size() < cut_off_age) {
+			root.setChild((TreeNode<Block>)this);
+			added = true;
+		} else {
+			if (!added) {
+				for (TreeNode<Block> treeNode : root.getChildren()) {
+					addTreeNodeToBlockchain(cut_off_age, treeNode);
+				}
+			}
+			
+			
+		}
+		return added;
+	}
+	public TreeNode<Block> getParentTreeNode(ByteArrayWrapper parent, TreeNode<Block> root) {
+		
+		blockHeight++;
+		if (root.getChildren().size() > 0) {
+			for (TreeNode<Block> treeNode : root.getChildren()) {			
+				Block block = treeNode.getBlock();
+				ByteArrayWrapper current = new ByteArrayWrapper(block.getHash());
+				if (current.equals(parent)) {
+					parentNode = treeNode;
+				} else {
+				//	blockHeight = getParentBlockHeight(parent, treeNode);
+					parentNode = getParentTreeNode(parent, treeNode);
+				}
+				
+				
+			}
+			blockHeight--;	
+		} else {
+			parentNode = root;
+		}
+		
+		parentNode.blockHeight = this.blockHeight;
+//		parentNode.transactions = this.transactions;
+		return parentNode;
+	}
+	public Integer getBlockHeight() {
+		return this.blockHeight;
+	}
+	public boolean addTreeNodeToParent(TreeNode<Block> parent) {
+		boolean added = false;
+		parent.setChild((TreeNode<Block>)this);
+		return true;
+	}
 	
 }

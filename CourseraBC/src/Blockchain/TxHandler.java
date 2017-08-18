@@ -194,20 +194,21 @@ public class TxHandler {
 		}
     	
     	for (Transaction tx : goodTransactions) {			
-    		if (isValidTx(tx)) {
-    			validTransactions.add(tx);
-			}
-    		else {
-				for (Transaction.Input input : tx.getInputs()) {
-				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-					if (utxoPoolPossible.contains(utxo)) {
-						utxoPoolPossible.removeUTXO(utxo);
-					}
-					if (utxoPoolUsed.contains(utxo)) {
-						utxoPoolUsed.removeUTXO(utxo);
-					}
-				}
-			}
+    		validTransactions.add(tx);
+    		//    		if (isValidTx(tx)) {
+//    			validTransactions.add(tx);
+//			}
+//    		else {
+//				for (Transaction.Input input : tx.getInputs()) {
+//				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+//					if (utxoPoolPossible.contains(utxo)) {
+//						utxoPoolPossible.removeUTXO(utxo);
+//					}
+//					if (utxoPoolUsed.contains(utxo)) {
+//						utxoPoolUsed.removeUTXO(utxo);
+//					}
+//				}
+//			}
 		}
     	this.utxoPool = new UTXOPool();
     	for (UTXO utxo : utxoPoolPossible.getAllUTXO()) {
