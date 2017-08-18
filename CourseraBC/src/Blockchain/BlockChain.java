@@ -158,6 +158,7 @@ public class BlockChain {
 					transactionPool.removeTransaction(tx.getHash());
 				}
 			}
+			
 			addTransaction(block.getCoinbase());
 			for (Transaction tx : block.getTransactions()) {
 				addTransaction(tx);
@@ -186,10 +187,11 @@ final class TreeNode<T> {
 	private int blockHeight = 0;
 	public TreeNode<Block> lastNode = null;
 	private TreeNode<Block> parentNode = null;
-//	private Transaction[] transactions = null;
+	private ArrayList<Transaction> transactions = null;
 	public TreeNode(Block data) {
 		this.data = data;
 		this.localDateTime = LocalDateTime.now();
+		this.transactions = data.getTransactions();
 	}
 	public ArrayList<TreeNode<Block>> getChildren(){
 		return children;
@@ -212,6 +214,8 @@ final class TreeNode<T> {
 //		return this.maxHeight;
 	}
 	public Block getBlock() {
+		
+		
 		return this.data;
 	}
 	public TreeNode<Block> getMaxHeightNode(TreeNode<Block> root) {

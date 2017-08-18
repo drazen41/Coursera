@@ -36,7 +36,9 @@ public class TxHandler {
     	int i = 0;
     	double inputSum = 0;
     	double outputSum = 0;
-    	
+    	if (tx.isCoinbase()) {
+			return true;
+		}
     	ArrayList<Transaction.Output> usedOutputs = new ArrayList<Transaction.Output>();
     	if (inputs != null) {
     		for (Transaction.Input input  :  inputs) {
@@ -194,21 +196,21 @@ public class TxHandler {
 		}
     	
     	for (Transaction tx : goodTransactions) {			
-    		validTransactions.add(tx);
-    		//    		if (isValidTx(tx)) {
-//    			validTransactions.add(tx);
-//			}
-//    		else {
-//				for (Transaction.Input input : tx.getInputs()) {
-//				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-//					if (utxoPoolPossible.contains(utxo)) {
-//						utxoPoolPossible.removeUTXO(utxo);
-//					}
-//					if (utxoPoolUsed.contains(utxo)) {
-//						utxoPoolUsed.removeUTXO(utxo);
-//					}
-//				}
-//			}
+//    		validTransactions.add(tx);
+    		if (isValidTx(tx)) {
+    			validTransactions.add(tx);
+			}
+    		else {
+				for (Transaction.Input input : tx.getInputs()) {
+				UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+					if (utxoPoolPossible.contains(utxo)) {
+						utxoPoolPossible.removeUTXO(utxo);
+					}
+					if (utxoPoolUsed.contains(utxo)) {
+						utxoPoolUsed.removeUTXO(utxo);
+					}
+				}
+			}
 		}
     	this.utxoPool = new UTXOPool();
     	for (UTXO utxo : utxoPoolPossible.getAllUTXO()) {
