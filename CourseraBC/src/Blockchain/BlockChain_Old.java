@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
 // You should not have all the blocks added to the block chain in memory 
 // as it would cause a memory overflow.
 
-public class BlockChain {
+public class BlockChain_Old {
     public static final int CUT_OFF_AGE = 10;
 //    private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
@@ -25,7 +25,7 @@ public class BlockChain {
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
      * block
      */
-    public BlockChain(Block genesisBlock) {
+    public BlockChain_Old(Block genesisBlock) {
         // IMPLEMENT THIS
     	transactionPool = new TransactionPool();
     	Transaction transaction = genesisBlock.getCoinbase();
@@ -48,6 +48,10 @@ public class BlockChain {
     /** Get the maximum height block */
     public Block getMaxHeightBlock() {
         // IMPLEMENT THIS
+//    	Block block = new Block(prevHash, address);
+//    	blockChain.getHeight(blockChain);
+//    	Map.Entry<String , Block> block =  blocks.lastEntry();
+//    	return block.getValue();
     	TreeNode<Block> node = null;
     	int height = this.blockChain.getHeight(blockChain);
     	if (height == 1) {
@@ -63,7 +67,14 @@ public class BlockChain {
     /** Get the UTXOPool for mining a new block on top of max height block */
     public UTXOPool getMaxHeightUTXOPool() {
         // IMPLEMENT THIS
-
+//    	TreeNode<Block> node = null;
+//    	int height = this.blockChain.getHeight(blockChain);
+//    	if (height == 1) {
+//    		node = this.blockChain;
+//		} else {
+//			node = this.blockChain.getMaxHeightNode(blockChain);
+//		}
+//    	return node.txHandler.getUTXOPool();
     	return this.txHandler.getUTXOPool();
     	
     }
@@ -89,7 +100,72 @@ public class BlockChain {
     // Blockchain height ????
     public boolean addBlock(Block block) {
         // IMPLEMENT THIS
-    	boolean ok = true;
+    	boolean ok = false;
+    	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
+    	if (block.getPrevBlockHash() == null) {
+			return false;
+		}
+    	// maintain a UTXO pool corresponding to every block on top of which a new block might be created - 
+    	// 1. put block on top
+//    	blocks.put(block.getHash().toString(), block);
+    	// 2. 
+    	int i = 0;
+    	for (Transaction transaction : block.getTransactions()) {
+			if (!this.txHandler.isValidTx(transaction))
+				return false;
+    		
+			
+			
+			transactions[i] = transaction;
+    		i++;
+		}
+    	// Add block to block with previous hash, provjeri da li je maksimalna visina blockchaina - cut_off-age odgovara visini na kojoj je parent + 1
+    	// Ne moze se dodati block ispod parenta ako uvjet iznad nije zadovoljen (pronaci visinu parenta u blochainu)
+    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+    	int maxHeight = this.blockChain.getHeight(blockChain);
+        ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+        TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
+        int parentBlockHeight = parent.getBlockHeight();
+        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+			ok = false;
+		} else {
+			// Dodaj block parentu
+			treeNode.addTreeNodeToParent(parent);
+			if (parentBlockHeight >= maxHeight) {
+				this.txHandler.handleTxs(transactions);
+			}
+			// Transaction pool
+//			TransactionPool tPool = new TransactionPool();			
+//			for (Transaction tx1 : transactionPool.getTransactions()) {
+//				for (Transaction tx2 : parent.getBlock().getTransactions()) {
+//					if (tx1.equals(tx2)) {
+//						continue;
+//					} else {
+//						tPool.addTransaction(tx2);
+//					}
+//				}
+//			}
+//			this.transactionPool = tPool;
+			Block block2 = parent.getBlock();
+			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+			if (block2Coinbase != null) {
+				transactionPool.removeTransaction(block2Coinbase.getHash());
+			}	
+			
+			for (Transaction tx : block2.getTransactions()) {
+				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+				if (transaction != null) {
+					transactionPool.removeTransaction(tx.getHash());
+				}
+			}
+			
+			addTransaction(block.getCoinbase());
+			for (Transaction tx : block.getTransactions()) {
+				addTransaction(tx);
+			}
+			
+			ok = true;
+		}
     	return ok;
     }
 
