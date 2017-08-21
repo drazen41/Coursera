@@ -1,4 +1,4 @@
-//package Blockchain;
+package Blockchain;
 
 import java.awt.List;
 import java.sql.Date;
@@ -97,6 +97,16 @@ public class BlockChain  {
         // IMPLEMENT THIS
     	boolean ok = true;
     	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
+    	int i = 0;
+    	for (Transaction transaction : block.getTransactions()) {
+			if (!this.txHandler.isValidTx(transaction))
+				return false;
+    		
+			
+			
+			transactions[i] = transaction;
+    		i++;
+		}
     	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
@@ -106,17 +116,14 @@ public class BlockChain  {
     	
         ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
         TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
-        if (parent.getBlock() == null)
+        if (parent == null)
         	return false;			
         int parentBlockHeight = parent.getBlockHeight();
         if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
 			ok = false;
 		} else {
 			// Dodaj block parentu
-			if (maxHeight>0) {
-				
-//				treeNode.addTreeNodeToParent(parent);
-			}
+//			treeNode.addTreeNodeToParent(parent);
 			
 //			if (parentBlockHeight >= maxHeight) {
 //				this.txHandler.handleTxs(transactions);
@@ -280,12 +287,22 @@ final class TreeNode<T> {
 			}
 			blockHeight--;	
 		} else {
-			parentNode = root;
+			ByteArrayWrapper currentParentHash = new ByteArrayWrapper(root.getBlock().getHash());
+			if (currentParentHash.equals(parent)) {
+				parentNode = root;
+			} else {
+				return null;
+			}
+			
+		}
+		if (parentNode == null) {
+			return null;
+		} else {
+			parentNode.blockHeight = this.blockHeight;
+//			parentNode.transactions = this.transactions;
+			return parentNode;
 		}
 		
-		parentNode.blockHeight = this.blockHeight;
-//		parentNode.transactions = this.transactions;
-		return parentNode;
 	}
 	public Integer getBlockHeight() {
 		return this.blockHeight;

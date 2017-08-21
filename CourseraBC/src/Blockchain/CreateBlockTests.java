@@ -22,6 +22,7 @@ public class CreateBlockTests {
 	 	BlockHandler bh = new BlockHandler(bc);
 	 	
 	 // Test 22.
+	 	
 	  Tx tx1 = new Tx();	 	
       tx1.addInput(genesis.getCoinbase().getHash(), 0);
       tx1.addOutput(5, pk_alice.getPublic());

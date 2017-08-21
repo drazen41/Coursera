@@ -1,4 +1,4 @@
-package Blockchain;
+ package Blockchain;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -20,8 +20,14 @@ public class ProcessBlockTests {
 	 	genesis.finalize();
 	 	BlockChain bc = new BlockChain(genesis);
 	 	BlockHandler bh = new BlockHandler(bc);
+	 	boolean procesBlokOk = false;
+	 	// Test 6
+//	 	Block block1 = new Block(genesis.getHash(), pk_alice.getPublic());
+//	 	procesBlokOk = bc.addBlock(block1);
+	 	byte[] bytes = new byte[5];
+	 	Block block = new Block(bytes, pk_alice.getPublic());
+	 	procesBlokOk = bc.addBlock(block);
 	 	
-	 	Block block1 = new Block(genesis.getHash(), pk_alice.getPublic());
 	 	Tx tx1 = new Tx();
 //       tx1.addInput(genesis.getCoinbase().getHash(), 0);
 //       tx1.addOutput(5, pk_alice.getPublic());
@@ -64,6 +70,6 @@ public class ProcessBlockTests {
 		
 		
 		
-		System.out.println("Block1 Added ok: " + bh.processBlock(block1)); // Ovdje kreirati UTXO pool
+//		System.out.println("Block1 Added ok: " + bh.processBlock(block1)); // Ovdje kreirati UTXO pool
 	}
 }
