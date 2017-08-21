@@ -1,4 +1,4 @@
-package Blockchain;
+//package Blockchain;
 
 import java.awt.List;
 import java.sql.Date;
@@ -15,8 +15,9 @@ import org.w3c.dom.NodeList;
 // You should not have all the blocks added to the block chain in memory 
 // as it would cause a memory overflow.
 
-public class BlockChain {
-    public static final int CUT_OFF_AGE = 10;
+public class BlockChain  {
+    
+	public static final int CUT_OFF_AGE = 10;
 //    private TreeMap<String ,Block> blocks;
     private TreeNode<Block> blockChain;
     private TxHandler txHandler = null;
@@ -36,8 +37,7 @@ public class BlockChain {
     	this.txHandler = new TxHandler(utxoPool);
     	
     	
-//    	blocks = new TreeMap<String ,Block>();  	
-//    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
+
     	blockChain = new TreeNode<Block>(genesisBlock );
 //    	blockChain.setTxHandler(utxoPool);
     	
@@ -49,14 +49,20 @@ public class BlockChain {
     public Block getMaxHeightBlock() {
         // IMPLEMENT THIS
     	TreeNode<Block> node = null;
-    	int height = this.blockChain.getHeight(blockChain);
-    	if (height == 1) {
-    		return this.blockChain.getBlock();
-		} else {
-			node = this.blockChain.getMaxHeightNode(blockChain);
+    	try {
+    		int height = this.blockChain.getHeight(blockChain);
+        	if (height == 1) {
+        		return this.blockChain.getBlock();
+    		} else {
+    			node = this.blockChain.getMaxHeightNode(blockChain);
+    		}
+        	 
+        	return node.getBlock();
+		} catch (Exception e) {
+			// TODO: handle exception
+			return null;
 		}
-    	 
-    	return node.getBlock();
+    	
     	
     }
 
@@ -90,13 +96,66 @@ public class BlockChain {
     public boolean addBlock(Block block) {
         // IMPLEMENT THIS
     	boolean ok = true;
+    	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
+    	if (block.getPrevBlockHash() == null) {
+			return false;
+		}
+    	int maxHeight = this.blockChain.getHeight(blockChain);
+    	if (maxHeight==0) return false;
+    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+    	
+        ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+        TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
+        if (parent.getBlock() == null)
+        	return false;			
+        int parentBlockHeight = parent.getBlockHeight();
+        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+			ok = false;
+		} else {
+			// Dodaj block parentu
+			if (maxHeight>0) {
+				
+//				treeNode.addTreeNodeToParent(parent);
+			}
+			
+//			if (parentBlockHeight >= maxHeight) {
+//				this.txHandler.handleTxs(transactions);
+//			}
+			
+//			Block block2 = parent.getBlock();
+//			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+//			if (block2Coinbase != null) {
+//				transactionPool.removeTransaction(block2Coinbase.getHash());
+//			}	
+//			
+//			for (Transaction tx : block2.getTransactions()) {
+//				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+//				if (transaction != null) {
+//					transactionPool.removeTransaction(tx.getHash());
+//				}
+//			}
+//			
+//			addTransaction(block.getCoinbase());
+//			for (Transaction tx : block.getTransactions()) {
+//				addTransaction(tx);
+//			}
+			
+			ok = true;
+		}
+    	
     	return ok;
     }
 
     /** Add a transaction to the transaction pool */
     public void addTransaction(Transaction tx) {
         // IMPLEMENT THIS
-    	this.transactionPool.addTransaction(tx);
+    	try {
+    		this.transactionPool.addTransaction(tx);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+    	
+    	
     }
 }
 final class TreeNode<T> {
@@ -115,7 +174,7 @@ final class TreeNode<T> {
 	public TreeNode(Block data) {
 		this.data = data;
 		this.localDateTime = LocalDateTime.now();
-		this.transactions = data.getTransactions();
+//		this.transactions = data.getTransactions();
 	}
 	public ArrayList<TreeNode<Block>> getChildren(){
 		return children;
@@ -233,8 +292,16 @@ final class TreeNode<T> {
 	}
 	public boolean addTreeNodeToParent(TreeNode<Block> parent) {
 		boolean added = false;
-		parent.setChild((TreeNode<Block>)this);
-		return true;
+		if (parent.getBlock() != null) {
+			parent.setChild((TreeNode<Block>)this);
+			return true;
+		}
+		return added;
 	}
 	
+}
+final class MyException extends Exception {
+	public MyException (String msg) {
+		super(msg);
+	}
 }

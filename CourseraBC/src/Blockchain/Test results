@@ -1,11 +1,12 @@
 Running 27 tests.
- ###################### processBlock() tests:
+ ###################### 
+ processBlock() tests:
   ###################### 
   Test 1: Process a block with no transactions ==> passed
   Test 2: Process a block with a single valid transaction ==> passed
   Test 3: Process a block with many valid transactions ==> passed 
   Test 4: Process a block with some double spends ==> FAILED 
-  Test 5: Process a new genesis block ==> FAILED 
+  Test 5: Process a new genesis block ==> passed 
   Test 6: Process a block with an invalid prevBlockHash ==> FAILED 
   Test 7: Process blocks with different sorts of invalid transactions ==> FAILED 
   Test 8: Process multiple blocks directly on top of the genesis block ==> passed 
@@ -16,8 +17,8 @@ Running 27 tests.
   Test 13: Process a linear chain of blocks of length CUT_OFF_AGE and then a block on top of the genesis block ==> passed 
   Test 14: Process a linear chain of blocks of length CUT_OFF_AGE + 1 and then a block on top of the genesis block ==> FAILED 
   
-  
-  ###################### createBlock() tests: 
+  ###################### 
+  createBlock() tests: 
   ###################### 
   Test 15: Create a block when no transactions have been processed ==> passed 
   Test 16: Create a block after a single valid transaction has been processed ==> passed 
@@ -25,7 +26,11 @@ Running 27 tests.
   Test 18: Create a block after a valid transaction has been processed that is already in a block in the longest valid branch ==> FAILED 
   Test 19: Create a block after a valid transaction has been processed that uses a UTXO already claimed by a transaction in the longest valid branch ==> FAILED 
   Test 20: Create a block after a valid transaction has been processed that is not a double spend on the longest valid branch and has not yet been included in any other block ==> FAILED 
-  Test 21: Create a block after only invalid transactions have been processed ==> passed ###################### Combination tests: ###################### 
+  Test 21: Create a block after only invalid transactions have been processed ==> passed
+  
+  ###################### 
+   Combination tests: 
+  ###################### 
   Test 22: Process a transaction, create a block, process a transaction, create a block, ... ==> FAILED 
   Test 23: Process a transaction, create a block, then process a block on top of that block with a transaction claiming a UTXO from that transaction ==> passed 
   Test 24: Process a transaction, create a block, then process a block on top of the genesis block with a transaction claiming a UTXO from that transaction ==> FAILED 
