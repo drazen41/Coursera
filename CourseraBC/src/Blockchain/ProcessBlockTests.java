@@ -39,10 +39,13 @@ public class ProcessBlockTests {
 ////	 	bc.addBlock(block1);
 //	 	boolean ok = bh.processBlock(block1);
 	 	
-	 	Block block2 = bh.createBlock(pk_alice.getPublic());
+//	 	Block block2 = bh.createBlock(pk_alice.getPublic());
 	 	
-		
-		
+		TreeNode<Block> node = new TreeNode<>(null);
+		ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+        TreeNode<Block> parent = node.getParentTreeNode(parentWrapper, bc.blockChain);
+		procesBlokOk = node.addTreeNodeToParent(parent,node);
+		Block block3 = bh.createBlock(pk_alice.getPublic());
 		
 //		Block block11 = new Block(block1.getHash(), pk_bob.getPublic());
 //	 	Tx tx2 = new Tx();

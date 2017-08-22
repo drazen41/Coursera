@@ -1,4 +1,4 @@
-package Blockchain;
+ // package Blockchain;
 
 import java.awt.List;
 import java.sql.Date;
@@ -19,7 +19,7 @@ public class BlockChain  {
     
 	public static final int CUT_OFF_AGE = 10;
 //    private TreeMap<String ,Block> blocks;
-    private TreeNode<Block> blockChain;
+    public TreeNode<Block> blockChain;
     private TxHandler txHandler = null;
     TransactionPool transactionPool = null;
     /**
@@ -96,66 +96,70 @@ public class BlockChain  {
     public boolean addBlock(Block block) {
         // IMPLEMENT THIS
     	boolean ok = true;
+//    	return true;
+//    	if (block.getTransactions().size() == 0 || block == null) {
+//			return false;
+//		}
     	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
     	int i = 0;
     	for (Transaction transaction : block.getTransactions()) {
 			if (!this.txHandler.isValidTx(transaction))
-				return false;
-    		
-			
-			
+				return false; 		
 			transactions[i] = transaction;
     		i++;
 		}
     	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
-    	int maxHeight = this.blockChain.getHeight(blockChain);
-    	if (maxHeight==0) return false;
-    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
-    	
-        ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
-        TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
-        if (parent == null)
-        	return false;			
-        int parentBlockHeight = parent.getBlockHeight();
-        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
-			ok = false;
-		} else {
-			// Dodaj block parentu
-//			treeNode.addTreeNodeToParent(parent);
-			
-//			if (parentBlockHeight >= maxHeight) {
-//				this.txHandler.handleTxs(transactions);
-//			}
-			
-//			Block block2 = parent.getBlock();
-//			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
-//			if (block2Coinbase != null) {
-//				transactionPool.removeTransaction(block2Coinbase.getHash());
-//			}	
+//    	int maxHeight = this.blockChain.getHeight(blockChain);
+//    	if (maxHeight==0) return false;
+//    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+//    	
+//        ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+//        TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
+//        if (parent == null)
+//        	return false;			
+//        int parentBlockHeight = parent.getBlockHeight();
+//        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+//			return false;
+//		} else {
+//			// Dodaj block parentu
+////			boolean added = treeNode.addTreeNodeToParent(parent, treeNode);
 //			
-//			for (Transaction tx : block2.getTransactions()) {
-//				Transaction transaction = transactionPool.getTransaction(tx.getHash());
-//				if (transaction != null) {
-//					transactionPool.removeTransaction(tx.getHash());
-//				}
-//			}
+////			if (parentBlockHeight >= maxHeight) {
+////				this.txHandler.handleTxs(transactions);
+////			}
 //			
-//			addTransaction(block.getCoinbase());
-//			for (Transaction tx : block.getTransactions()) {
-//				addTransaction(tx);
-//			}
-			
-			ok = true;
-		}
-    	
+////			Block block2 = parent.getBlock();
+////			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+////			if (block2Coinbase != null) {
+////				transactionPool.removeTransaction(block2Coinbase.getHash());
+////			}	
+////			
+////			for (Transaction tx : block2.getTransactions()) {
+////				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+////				if (transaction != null) {
+////					transactionPool.removeTransaction(tx.getHash());
+////				}
+////			}
+////			
+////			addTransaction(block.getCoinbase());
+////			for (Transaction tx : block.getTransactions()) {
+////				addTransaction(tx);
+////			}
+//			
+////			ok = true;
+//		}
+//    	
     	return ok;
     }
 
     /** Add a transaction to the transaction pool */
     public void addTransaction(Transaction tx) {
         // IMPLEMENT THIS
+    	if (tx == null) {
+			return;
+		}
     	try {
     		this.transactionPool.addTransaction(tx);
 		} catch (Exception e) {
@@ -307,13 +311,14 @@ final class TreeNode<T> {
 	public Integer getBlockHeight() {
 		return this.blockHeight;
 	}
-	public boolean addTreeNodeToParent(TreeNode<Block> parent) {
-		boolean added = false;
-		if (parent.getBlock() != null) {
-			parent.setChild((TreeNode<Block>)this);
-			return true;
+	public boolean addTreeNodeToParent(TreeNode<Block> parent, TreeNode<Block> child) {
+		
+		if (parent == null || child == null ) {
+			return false;
 		}
-		return added;
+		parent.setChild(child);
+		return true;
+		
 	}
 	
 }
