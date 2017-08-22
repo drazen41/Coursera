@@ -18,7 +18,7 @@ public class Test {
 	     
 	    Block genesis = new Block(null, pk_scrooge.getPublic());
 	 	genesis.finalize();
-	 	BlockChain bc = new BlockChain(genesis);
+	 	BlockChain_No bc = new BlockChain_No(genesis);
 	 	BlockHandler bh = new BlockHandler(bc);
 	 	
 	 	Block block1 = new Block(genesis.getHash(), pk_alice.getPublic());

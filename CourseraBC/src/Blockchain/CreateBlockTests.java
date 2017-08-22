@@ -18,7 +18,7 @@ public class CreateBlockTests {
 	     
 	    Block genesis = new Block(null, pk_scrooge.getPublic());
 	 	genesis.finalize();
-	 	BlockChain bc = new BlockChain(genesis);
+	 	BlockChain_No bc = new BlockChain_No(genesis);
 	 	BlockHandler bh = new BlockHandler(bc);
 	 	
 	 // Test 22.

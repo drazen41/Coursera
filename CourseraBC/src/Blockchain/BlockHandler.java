@@ -4,10 +4,10 @@ package Blockchain;
 import java.security.PublicKey;
 
 public class BlockHandler {
-    private BlockChain blockChain;
+    private BlockChain_No blockChain;
 
     /** assume blockChain has the genesis block */
-    public BlockHandler(BlockChain blockChain) {
+    public BlockHandler(BlockChain_No blockChain) {
         this.blockChain = blockChain;
     }
 

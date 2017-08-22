@@ -1,4 +1,4 @@
-// package Blockchain;
+//  package Blockchain;
 
 import java.awt.List;
 import java.sql.Date;
@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
 // You should not have all the blocks added to the block chain in memory 
 // as it would cause a memory overflow.
 
-public class BlockChain {
+public class BlockChain_Ispocetka {
     
 	public static final int CUT_OFF_AGE = 10;
 //    private TreeMap<String ,Block> blocks;
@@ -27,7 +27,7 @@ public class BlockChain {
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
      * block
      */
-    public BlockChain(Block genesisBlock) {
+    public BlockChain_Ispocetka(Block genesisBlock) {
         // IMPLEMENT THIS
     	transactionPool = new TransactionPool();
     	Transaction transaction = genesisBlock.getCoinbase();
@@ -96,9 +96,11 @@ public class BlockChain {
     // Blockchain height ????
     public boolean addBlock(Block block)  {
         // IMPLEMENT THIS
-    	if (this.transactionPool.getTransactions().size() == 0) {
-			return false;
-		}
+    	boolean ok = true;
+//    	return true;
+//    	if (block.getTransactions().size() == 0 || block == null) {
+//			return false;
+//		}
     	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
     	int i = 0;
     	for (Transaction transaction : block.getTransactions()) {
@@ -110,19 +112,80 @@ public class BlockChain {
     	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
+    	int maxHeight = this.blockChain.getHeight(blockChain);
     	TreeNode<Block> treeNode = new TreeNode<Block>(block);    	
         ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
         TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
-        if (parent == null) {
-        	return false;
-        } else {
-        	treeNode.addTreeNodeToParent(parent, treeNode);
-        	return true;
-        }
-        
-        
-        		
-//    	return false;
+        if (parent == null)
+        	return false;			
+        int parentBlockHeight = parent.getBlockHeight();
+       if (parentBlockHeight == 0) {
+    	   try {
+				
+				throw new MyException("Blockchain height: " + parent.getHeight(blockChain) + ", Block parent height: " + parentBlockHeight
+						+ "Parent transactions: " + parent.getBlock().getTransactions().size());
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+//        boolean added = treeNode.addTreeNodeToParent(parent, treeNode);
+        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+			return false;
+		} else {
+			// Dodaj block parentu
+			if (parentBlockHeight>0) {
+				boolean added = treeNode.addTreeNodeToParent(parent, treeNode);
+				if (!added) {
+					return false;
+				}
+				
+			} else {
+				try {
+					treeNode.addTreeNodeToParent(this.blockChain, treeNode);
+					throw new MyException("Parent block height " + parentBlockHeight);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+//				if (this.blockChain != null) {
+//					boolean added = treeNode.addTreeNodeToParent(this.blockChain, treeNode);
+//					if (!added) {
+//						return false;
+//					}
+//				}
+				
+			}
+			
+			
+			
+//			if (parentBlockHeight >= maxHeight) {
+//				this.txHandler.handleTxs(transactions);
+//			}
+			
+//			Block block2 = parent.getBlock();
+//			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+//			if (block2Coinbase != null) {
+//				transactionPool.removeTransaction(block2Coinbase.getHash());
+//			}	
+//			
+//			for (Transaction tx : block2.getTransactions()) {
+//				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+//				if (transaction != null) {
+//					transactionPool.removeTransaction(tx.getHash());
+//				}
+//			}
+//			
+//			addTransaction(block.getCoinbase());
+//			for (Transaction tx : block.getTransactions()) {
+//				addTransaction(tx);
+//			}
+//			throw new MyException("Dodaj blok parentu.");
+//			ok = true;
+		}
+//    	
+    	return true;
     }
 
     /** Add a transaction to the transaction pool */
