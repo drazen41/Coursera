@@ -1,4 +1,4 @@
-// package Blockchain;
+package Blockchain;
 
 import java.awt.List;
 import java.sql.Date;
@@ -15,19 +15,17 @@ import org.w3c.dom.NodeList;
 // You should not have all the blocks added to the block chain in memory 
 // as it would cause a memory overflow.
 
-public class BlockChain {
-    
-	public static final int CUT_OFF_AGE = 10;
+public class BlockChain_Old {
+    public static final int CUT_OFF_AGE = 10;
 //    private TreeMap<String ,Block> blocks;
-	
-    public TreeNode<Block> blockChain;
+    private TreeNode<Block> blockChain;
     private TxHandler txHandler = null;
     TransactionPool transactionPool = null;
     /**
      * create an empty block chain with just a genesis block. Assume {@code genesisBlock} is a valid
      * block
      */
-    public BlockChain(Block genesisBlock) {
+    public BlockChain_Old(Block genesisBlock) {
         // IMPLEMENT THIS
     	transactionPool = new TransactionPool();
     	Transaction transaction = genesisBlock.getCoinbase();
@@ -38,7 +36,8 @@ public class BlockChain {
     	this.txHandler = new TxHandler(utxoPool);
     	
     	
-
+//    	blocks = new TreeMap<String ,Block>();  	
+//    	blocks.put(genesisBlock.getHash().toString(),genesisBlock);
     	blockChain = new TreeNode<Block>(genesisBlock );
 //    	blockChain.setTxHandler(utxoPool);
     	
@@ -49,28 +48,33 @@ public class BlockChain {
     /** Get the maximum height block */
     public Block getMaxHeightBlock() {
         // IMPLEMENT THIS
+//    	Block block = new Block(prevHash, address);
+//    	blockChain.getHeight(blockChain);
+//    	Map.Entry<String , Block> block =  blocks.lastEntry();
+//    	return block.getValue();
     	TreeNode<Block> node = null;
-    	try {
-    		int height = this.blockChain.getHeight(blockChain);
-        	if (height == 1) {
-        		return this.blockChain.getBlock();
-    		} else {
-    			node = this.blockChain.getMaxHeightNode(blockChain);
-    		}
-        	 
-        	return node.getBlock();
-		} catch (Exception e) {
-			// TODO: handle exception
-			return null;
+    	int height = this.blockChain.getHeight(blockChain);
+    	if (height == 1) {
+    		return this.blockChain.getBlock();
+		} else {
+			node = this.blockChain.getMaxHeightNode(blockChain);
 		}
-    	
+    	 
+    	return node.getBlock();
     	
     }
 
     /** Get the UTXOPool for mining a new block on top of max height block */
     public UTXOPool getMaxHeightUTXOPool() {
         // IMPLEMENT THIS
-
+//    	TreeNode<Block> node = null;
+//    	int height = this.blockChain.getHeight(blockChain);
+//    	if (height == 1) {
+//    		node = this.blockChain;
+//		} else {
+//			node = this.blockChain.getMaxHeightNode(blockChain);
+//		}
+//    	return node.txHandler.getUTXOPool();
     	return this.txHandler.getUTXOPool();
     	
     }
@@ -94,50 +98,81 @@ public class BlockChain {
      * @return true if block is successfully added
      */
     // Blockchain height ????
-    public boolean addBlock(Block block)  {
+    public boolean addBlock(Block block) {
         // IMPLEMENT THIS
-    	if (this.transactionPool.getTransactions().size() == 0) {
-			return false;
-		}
+    	boolean ok = false;
     	Transaction[] transactions  = new Transaction[block.getTransactions().size()];
-    	int i = 0;
-    	for (Transaction transaction : block.getTransactions()) {
-			if (!this.txHandler.isValidTx(transaction))
-				return false; 		
-			transactions[i] = transaction;
-    		i++;
-		}
     	if (block.getPrevBlockHash() == null) {
 			return false;
 		}
-    	TreeNode<Block> treeNode = new TreeNode<Block>(block);    	
+    	// maintain a UTXO pool corresponding to every block on top of which a new block might be created - 
+    	// 1. put block on top
+//    	blocks.put(block.getHash().toString(), block);
+    	// 2. 
+    	int i = 0;
+    	for (Transaction transaction : block.getTransactions()) {
+			if (!this.txHandler.isValidTx(transaction))
+				return false;
+    		
+			
+			
+			transactions[i] = transaction;
+    		i++;
+		}
+    	// Add block to block with previous hash, provjeri da li je maksimalna visina blockchaina - cut_off-age odgovara visini na kojoj je parent + 1
+    	// Ne moze se dodati block ispod parenta ako uvjet iznad nije zadovoljen (pronaci visinu parenta u blochainu)
+    	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+    	int maxHeight = this.blockChain.getHeight(blockChain);
         ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
         TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
-        if (parent == null) {
-        	return false;
-        } else {
-        	treeNode.addTreeNodeToParent(parent, treeNode);
-        	return true;
-        }
-        
-        
-        		
-//    	return false;
+        int parentBlockHeight = parent.getBlockHeight();
+        if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+			ok = false;
+		} else {
+			// Dodaj block parentu
+			treeNode.addTreeNodeToParent(parent);
+			if (parentBlockHeight >= maxHeight) {
+				this.txHandler.handleTxs(transactions);
+			}
+			// Transaction pool
+//			TransactionPool tPool = new TransactionPool();			
+//			for (Transaction tx1 : transactionPool.getTransactions()) {
+//				for (Transaction tx2 : parent.getBlock().getTransactions()) {
+//					if (tx1.equals(tx2)) {
+//						continue;
+//					} else {
+//						tPool.addTransaction(tx2);
+//					}
+//				}
+//			}
+//			this.transactionPool = tPool;
+			Block block2 = parent.getBlock();
+			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+			if (block2Coinbase != null) {
+				transactionPool.removeTransaction(block2Coinbase.getHash());
+			}	
+			
+			for (Transaction tx : block2.getTransactions()) {
+				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+				if (transaction != null) {
+					transactionPool.removeTransaction(tx.getHash());
+				}
+			}
+			
+			addTransaction(block.getCoinbase());
+			for (Transaction tx : block.getTransactions()) {
+				addTransaction(tx);
+			}
+			
+			ok = true;
+		}
+    	return ok;
     }
 
     /** Add a transaction to the transaction pool */
     public void addTransaction(Transaction tx) {
         // IMPLEMENT THIS
-    	if (tx == null) {
-			return;
-		}
-    	try {
-    		this.transactionPool.addTransaction(tx);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-    	
-    	
+    	this.transactionPool.addTransaction(tx);
     }
 }
 final class TreeNode<T> {
@@ -156,7 +191,7 @@ final class TreeNode<T> {
 	public TreeNode(Block data) {
 		this.data = data;
 		this.localDateTime = LocalDateTime.now();
-//		this.transactions = data.getTransactions();
+		this.transactions = data.getTransactions();
 	}
 	public ArrayList<TreeNode<Block>> getChildren(){
 		return children;
@@ -262,53 +297,20 @@ final class TreeNode<T> {
 			}
 			blockHeight--;	
 		} else {
-			ByteArrayWrapper currentParentHash = new ByteArrayWrapper(root.getBlock().getHash());
-			if (currentParentHash.equals(parent)) {
-				parentNode = root;
-			} else {
-				return null;
-			}
-			
-		}
-		if (parentNode == null) {
-			return null;
-		} else {
-			parentNode.blockHeight = this.blockHeight;
-//			parentNode.transactions = this.transactions;
-			return parentNode;
+			parentNode = root;
 		}
 		
+		parentNode.blockHeight = this.blockHeight;
+//		parentNode.transactions = this.transactions;
+		return parentNode;
 	}
-//	public TreeNode<Block> getParentTreeNode2(ByteArrayWrapper parent, TreeNode<Block> root) {
-//		if (parent.equals(root.data.getHash())) {
-//			root.blockHeight++;
-//			return root;
-//		} else {
-//			root.blockHeight++;
-//			
-//		}
-//	}
 	public Integer getBlockHeight() {
 		return this.blockHeight;
 	}
-	public boolean addTreeNodeToParent(TreeNode<Block> parent, TreeNode<Block> child) {
-		
-		if (parent == null || child == null ) {
-			return false;
-		}
-		parent.setChild(child);
+	public boolean addTreeNodeToParent(TreeNode<Block> parent) {
+		boolean added = false;
+		parent.setChild((TreeNode<Block>)this);
 		return true;
-		
 	}
 	
-}
-final class MyException extends Exception {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public MyException (String msg) {
-		super(msg);
-	}
 }

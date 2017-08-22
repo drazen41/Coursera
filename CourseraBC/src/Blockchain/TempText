@@ -1,0 +1,55 @@
+try {
+    		Transaction[] transactions  = new Transaction[block.getTransactions().size()];
+        	if (block.getPrevBlockHash() == null) {
+    			return false;
+    		}
+        	int maxHeight = this.blockChain.getHeight(blockChain);
+        	if (maxHeight==0) return false;
+        	TreeNode<Block> treeNode = new TreeNode<Block>(block);
+        	
+            ByteArrayWrapper parentWrapper = new ByteArrayWrapper(block.getPrevBlockHash());
+            TreeNode<Block> parent = treeNode.getParentTreeNode(parentWrapper, blockChain);
+            if (parent.getBlock() == null)
+            	return false;			
+            int parentBlockHeight = parent.getBlockHeight();
+            if ((maxHeight-CUT_OFF_AGE) > (parentBlockHeight+1)) {
+    			ok = false;
+    		} else {
+    			// Dodaj block parentu
+    			if (maxHeight>0) {
+    				try {
+    					treeNode.addTreeNodeToParent(parent);
+    				} catch (Exception e) {
+    					// TODO: handle exception
+    					return false;
+    				}
+    				
+    			}
+    			
+//    			if (parentBlockHeight >= maxHeight) {
+//    				this.txHandler.handleTxs(transactions);
+//    			}
+    			
+//    			Block block2 = parent.getBlock();
+//    			Transaction block2Coinbase = transactionPool.getTransaction(block2.getCoinbase().getHash());
+//    			if (block2Coinbase != null) {
+//    				transactionPool.removeTransaction(block2Coinbase.getHash());
+//    			}	
+//    			
+//    			for (Transaction tx : block2.getTransactions()) {
+//    				Transaction transaction = transactionPool.getTransaction(tx.getHash());
+//    				if (transaction != null) {
+//    					transactionPool.removeTransaction(tx.getHash());
+//    				}
+//    			}
+//    			
+//    			addTransaction(block.getCoinbase());
+//    			for (Transaction tx : block.getTransactions()) {
+//    				addTransaction(tx);
+//    			}
+    			
+    			ok = true;
+    		}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
